@@ -149,7 +149,10 @@ namespace ExcelToSql
                 }
                 id++;
             }
-            inserts.Add("COMMIT;");
+            if(config.DatabaseName == DatabaseEnum.Database.Oracle)
+            {
+                inserts.Add("COMMIT;");
+            }
             File.WriteAllLines($"{config.OutPath}\\{config.OutInsertFilename}", inserts);
         }
 
@@ -167,37 +170,34 @@ namespace ExcelToSql
                 {
                     lines.Add($"CREATE TABLE {config.ExcelTabular.ToLower()} (");
                 }
+                if (i < header.Fields.Count - 1)
+                {
+                    endField = ",";
+                }
                 else
                 {
-                    if (i < header.Fields.Count - 1)
+                    endField = ");";
+                }
+                if (field.Text == Constant.ID)
+                {
+                    if (config.DatabaseName == DatabaseEnum.Database.Oracle)
                     {
-                        endField = ",";
+                        lines.Add($"{field.Name} NUMBER({field.Length}){endField}");
                     }
-                    else
+                    if (config.DatabaseName == DatabaseEnum.Database.Postgres)
                     {
-                        endField = ");";
+                        lines.Add($"{field.Name} BIGINT{endField}");
                     }
-                    if (field.Text == Constant.ID)
+                }
+                else
+                {
+                    if(config.DatabaseName == DatabaseEnum.Database.Oracle)
                     {
-                        if (config.DatabaseName == DatabaseEnum.Database.Oracle)
-                        {
-                            lines.Add($"{field.Name} NUMBER({field.Length}){endField}");
-                        }
-                        if (config.DatabaseName == DatabaseEnum.Database.Postgres)
-                        {
-                            lines.Add($"{field.Name} BIGINT{endField}");
-                        }
+                        lines.Add($"{field.Name} VARCHAR2({field.Length}){endField}");
                     }
-                    else
+                    if (config.DatabaseName == DatabaseEnum.Database.Postgres)
                     {
-                        if(config.DatabaseName == DatabaseEnum.Database.Oracle)
-                        {
-                            lines.Add($"{field.Name} VARCHAR2({field.Length}){endField}");
-                        }
-                        if (config.DatabaseName == DatabaseEnum.Database.Postgres)
-                        {
-                            lines.Add($"{field.Name} VARCHAR({field.Length}){endField}");
-                        }
+                        lines.Add($"{field.Name} VARCHAR({field.Length}){endField}");
                     }
                 }
             }
