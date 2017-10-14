@@ -3,6 +3,7 @@ using System.IO;
 using ExcelDataReader;
 using System.Linq;
 using System.Data;
+using System.Collections.Generic;
 
 namespace ExcelToSql
 {
@@ -17,7 +18,7 @@ namespace ExcelToSql
 
         internal void Run()
         {
-            string filename = $"{this.config.Path}\\{this.config.Filename}";
+            string filename = $"{this.config.ExcelPath}\\{this.config.ExcelFilename}";
             using (var stream = File.Open(filename, FileMode.Open, FileAccess.Read))
             {
 
@@ -28,7 +29,7 @@ namespace ExcelToSql
                 {
 
 
-                    var result = reader.AsDataSet(new ExcelDataSetConfiguration()
+                    var dataset = reader.AsDataSet(new ExcelDataSetConfiguration()
                     {
 
                         // Gets or sets a value indicating whether to set the DataColumn.DataType 
@@ -48,21 +49,195 @@ namespace ExcelToSql
 
                             // Gets or sets a callback to determine which row is the header row. 
                             // Only called when UseHeaderRow = true.
-                            ReadHeaderRow = (rowReader) => {
+                            ReadHeaderRow = (rowReader) =>
+                            {
                                 // F.ex skip the first row and use the 2nd row as column headers:
                                 rowReader.Read();
                             },
 
                             // Gets or sets a callback to determine whether to include the 
                             // current row in the DataTable.
-                            FilterRow = (rowReader) => {
+                            FilterRow = (rowReader) =>
+                            {
                                 return true;
                             },
                         }
                     });
 
-                    var tabular = result.Tables.Cast<DataTable>().FirstOrDefault(d => d.TableName == config.Tabular);
+                    var tabular = dataset.Tables.Cast<DataTable>().FirstOrDefault(d => d.TableName == config.ExcelTabular);
 
+                    Header header = new Header();
+                    int columnId = 0;
+                    foreach (var item in tabular.Rows[0].ItemArray)
+                    {
+                        Field field = new Field
+                        {
+                            Row = 0,
+                            Column = columnId,
+                            Text = item.ToString().Trim().Replace(" ", "_"),
+                            Length = item.ToString().Length,
+                        };
+                        header.Fields.Add(field);
+                        columnId++;
+                    };
+
+                    foreach (Field field in header.Fields)
+                    {
+                        foreach (DataRow row in tabular.Rows)
+                        {
+                            int length = 0;
+
+                            object box = (object)row.ItemArray[field.Column];
+                            if (box.GetType() == typeof(DateTime))
+                            {
+                                DateTime dateTime = (DateTime)row.ItemArray[field.Column];
+                                length = dateTime.ToShortDateString().Length;
+                            }
+                            else
+                            {
+                                length = row.ItemArray[field.Column].ToString().Trim().Length;
+                            }
+
+                            if (field.Length < length)
+                            {
+                                field.Length = length;
+                            }
+                        }
+                    }
+
+                    Field fieldId = new Field
+                    {
+                        Row = 0,
+                        Column = header.Fields.Count,
+                        Text = Constant.ID,
+                        Length = Constant.ID_LENGHT
+                    };
+
+                    header.Fields.Add(fieldId);
+
+
+                    if (!string.IsNullOrEmpty(config.OutExtraFields))
+                    {
+                        var outExtraFields = config.OutExtraFields.Split(',');
+                        foreach (string outExtraField in outExtraFields)
+                        {
+                            Field fieldExtra = new Field
+                            {
+                                Row = 0,
+                                Column = header.Fields.Count,
+                                Text = outExtraField,
+                                Length = outExtraField.Length,
+                                Extra = true
+                            };
+
+                            header.Fields.Add(fieldExtra);
+                        }
+                    }
+
+                    List<string> lines = new List<string>();
+                    string endField = string.Empty;
+
+                    for (int i = 0; i < header.Fields.Count; i++)
+                    {
+                        Field field = header.Fields[i];
+
+                        if (i == 0)
+                        {
+                            lines.Add($"CREATE TABLE {config.ExcelTabular.ToLower()} (");
+                        }
+                        else
+                        {
+                            if (i < header.Fields.Count - 1)
+                            {
+                                endField = ",";
+                            }
+                            else
+                            {
+                                endField = ");";
+                            }
+                            if (field.Text == Constant.ID)
+                            {
+                                lines.Add($"{field.Name} NUMBER({field.Length}){endField}");
+                            }
+                            else
+                            {
+                                lines.Add($"{field.Name} VARCHAR2({field.Length}){endField}");
+                            }
+                        }
+                    }
+
+                    File.WriteAllLines($"{config.OutPath}\\{config.OutCreateFilename}", lines);
+
+
+                    string insertFieldNames = string.Empty;
+                    string valueExtraFields = string.Empty;
+
+                    for (int i = 0; i < header.Fields.Count; i++)
+                    {
+                        Field field = header.Fields[i];
+                        insertFieldNames += field.Name;
+
+                        if (i < header.Fields.Count - 1)
+                        {
+                            insertFieldNames += ", ";
+                        }
+
+                        if (field.Extra)
+                        {
+                            valueExtraFields += "null";
+                            if (i < header.Fields.Count - 1)
+                            {
+                                valueExtraFields += ", ";
+                            }
+                        }
+                    }
+
+
+
+                    int id = 0;
+                    List<string> inserts = new List<string>();
+                    foreach (DataRow row in tabular.Rows)
+                    {
+                        if (id > 0)
+                        {
+                            string values = string.Empty;
+                            for (int i = 0; i < row.ItemArray.Length; i++)
+                            {
+                                var field = row.ItemArray[i];
+
+                                string value = string.Empty;
+
+                                object box = (object)field;
+                                if (box.GetType() == typeof(DateTime))
+                                {
+                                    DateTime dateTime = (DateTime)field;
+                                    value = $"'{dateTime.ToShortDateString()}'";
+                                }
+                                else
+                                {
+                                    value = $"'{field.ToString().Trim()}'";
+                                }
+
+                                value += ", ";
+
+                                if (i == row.ItemArray.Length - 1)
+                                {
+                                    value += $"{id}";
+                                    if (!string.IsNullOrEmpty(valueExtraFields))
+                                    {
+                                        value += $", {valueExtraFields}";
+                                    }
+                                }
+
+                                values += value;
+                            }
+                            string insert = $"INSERT INTO {config.ExcelTabular} ({insertFieldNames}) VALUES ({values});";
+                            inserts.Add(insert);
+                        }
+                        id++;
+                    }
+                    inserts.Add("COMMIT;");
+                    File.WriteAllLines($"{config.OutPath}\\{config.OutInsertFilename}", inserts);
                 }
             }
         }

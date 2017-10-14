@@ -1,6 +1,4 @@
-﻿#define DEBUG 
-using System;
-using System.Configuration;
+﻿using System;
 using System.Reflection;
 
 namespace ExcelToSql
@@ -19,8 +17,6 @@ namespace ExcelToSql
             Read read = new Read(config);
 
             read.Run();
-
-            Console.ReadKey();
         }
 
         static void Help()
