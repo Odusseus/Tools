@@ -2,6 +2,7 @@
 {
     internal static class Constant
     {
+        internal const string DATABASE_NAME = "Database.Name";
         internal const string EXCEL_FILENAME = "Excel.Filename";
         public const string EXCEL_PATH = "Excel.Path";
         internal const string EXCEL_TABULAR = "Excel.Tabular";
@@ -14,5 +15,7 @@
 
         internal const string ID = "ID";
         internal const int ID_LENGHT = 9;
+        internal static string ORACLE = "Oracle";
+        internal static string POSTGRES = "Postgres";
     }
 }

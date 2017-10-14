@@ -18,6 +18,19 @@ namespace ExcelToSql
 
         internal void Run()
         {
+            DataTable tabular = GetTabular();
+
+            Header header = GetHeader(tabular);
+
+            CreateSqlScript(header);
+
+            InsertSqlScript(header, tabular);
+        }
+
+        private DataTable GetTabular()
+        {
+            DataTable tabular;
+
             string filename = $"{this.config.ExcelPath}\\{this.config.ExcelFilename}";
             using (var stream = File.Open(filename, FileMode.Open, FileAccess.Read))
             {
@@ -27,8 +40,6 @@ namespace ExcelToSql
                 //  - OpenXml Excel files (2007 format; *.xlsx)
                 using (var reader = ExcelReaderFactory.CreateReader(stream))
                 {
-
-
                     var dataset = reader.AsDataSet(new ExcelDataSetConfiguration()
                     {
 
@@ -64,180 +75,216 @@ namespace ExcelToSql
                         }
                     });
 
-                    var tabular = dataset.Tables.Cast<DataTable>().FirstOrDefault(d => d.TableName == config.ExcelTabular);
+                    tabular = dataset.Tables.Cast<DataTable>().FirstOrDefault(d => d.TableName == config.ExcelTabular);
+                }
+            }
 
-                    Header header = new Header();
-                    int columnId = 0;
-                    foreach (var item in tabular.Rows[0].ItemArray)
+            return tabular;
+        }
+
+        private void InsertSqlScript(Header header, DataTable tabular)
+        {
+            string insertFieldNames = string.Empty;
+            string valueExtraFields = string.Empty;
+
+            for (int i = 0; i < header.Fields.Count; i++)
+            {
+                Field field = header.Fields[i];
+                insertFieldNames += field.Name;
+
+                if (i < header.Fields.Count - 1)
+                {
+                    insertFieldNames += ", ";
+                }
+
+                if (field.Extra)
+                {
+                    valueExtraFields += "null";
+                    if (i < header.Fields.Count - 1)
                     {
-                        Field field = new Field
-                        {
-                            Row = 0,
-                            Column = columnId,
-                            Text = item.ToString().Trim().Replace(" ", "_"),
-                            Length = item.ToString().Length,
-                        };
-                        header.Fields.Add(field);
-                        columnId++;
-                    };
-
-                    foreach (Field field in header.Fields)
-                    {
-                        foreach (DataRow row in tabular.Rows)
-                        {
-                            int length = 0;
-
-                            object box = (object)row.ItemArray[field.Column];
-                            if (box.GetType() == typeof(DateTime))
-                            {
-                                DateTime dateTime = (DateTime)row.ItemArray[field.Column];
-                                length = dateTime.ToShortDateString().Length;
-                            }
-                            else
-                            {
-                                length = row.ItemArray[field.Column].ToString().Trim().Length;
-                            }
-
-                            if (field.Length < length)
-                            {
-                                field.Length = length;
-                            }
-                        }
+                        valueExtraFields += ", ";
                     }
+                }
+            }
 
-                    Field fieldId = new Field
+            int id = 0;
+            List<string> inserts = new List<string>();
+            foreach (DataRow row in tabular.Rows)
+            {
+                if (id > 0)
+                {
+                    string values = string.Empty;
+                    for (int i = 0; i < row.ItemArray.Length; i++)
                     {
-                        Row = 0,
-                        Column = header.Fields.Count,
-                        Text = Constant.ID,
-                        Length = Constant.ID_LENGHT
-                    };
+                        var field = row.ItemArray[i];
 
-                    header.Fields.Add(fieldId);
+                        string value = string.Empty;
 
-
-                    if (!string.IsNullOrEmpty(config.OutExtraFields))
-                    {
-                        var outExtraFields = config.OutExtraFields.Split(',');
-                        foreach (string outExtraField in outExtraFields)
+                        object box = (object)field;
+                        if (box.GetType() == typeof(DateTime))
                         {
-                            Field fieldExtra = new Field
-                            {
-                                Row = 0,
-                                Column = header.Fields.Count,
-                                Text = outExtraField,
-                                Length = outExtraField.Length,
-                                Extra = true
-                            };
-
-                            header.Fields.Add(fieldExtra);
-                        }
-                    }
-
-                    List<string> lines = new List<string>();
-                    string endField = string.Empty;
-
-                    for (int i = 0; i < header.Fields.Count; i++)
-                    {
-                        Field field = header.Fields[i];
-
-                        if (i == 0)
-                        {
-                            lines.Add($"CREATE TABLE {config.ExcelTabular.ToLower()} (");
+                            DateTime dateTime = (DateTime)field;
+                            value = $"'{dateTime.ToShortDateString()}'";
                         }
                         else
                         {
-                            if (i < header.Fields.Count - 1)
+                            value = $"'{field.ToString().Trim()}'";
+                        }
+
+                        value += ", ";
+
+                        if (i == row.ItemArray.Length - 1)
+                        {
+                            value += $"{id}";
+                            if (!string.IsNullOrEmpty(valueExtraFields))
                             {
-                                endField = ",";
-                            }
-                            else
-                            {
-                                endField = ");";
-                            }
-                            if (field.Text == Constant.ID)
-                            {
-                                lines.Add($"{field.Name} NUMBER({field.Length}){endField}");
-                            }
-                            else
-                            {
-                                lines.Add($"{field.Name} VARCHAR2({field.Length}){endField}");
+                                value += $", {valueExtraFields}";
                             }
                         }
+
+                        values += value;
                     }
+                    string insert = $"INSERT INTO {config.ExcelTabular.ToLower()} ({insertFieldNames}) VALUES ({values});";
+                    inserts.Add(insert);
+                }
+                id++;
+            }
+            inserts.Add("COMMIT;");
+            File.WriteAllLines($"{config.OutPath}\\{config.OutInsertFilename}", inserts);
+        }
 
-                    File.WriteAllLines($"{config.OutPath}\\{config.OutCreateFilename}", lines);
 
+        private void CreateSqlScript(Header header)
+        {
+            List<string> lines = new List<string>();
+            string endField = string.Empty;
 
-                    string insertFieldNames = string.Empty;
-                    string valueExtraFields = string.Empty;
+            for (int i = 0; i < header.Fields.Count; i++)
+            {
+                Field field = header.Fields[i];
 
-                    for (int i = 0; i < header.Fields.Count; i++)
+                if (i == 0)
+                {
+                    lines.Add($"CREATE TABLE {config.ExcelTabular.ToLower()} (");
+                }
+                else
+                {
+                    if (i < header.Fields.Count - 1)
                     {
-                        Field field = header.Fields[i];
-                        insertFieldNames += field.Name;
-
-                        if (i < header.Fields.Count - 1)
-                        {
-                            insertFieldNames += ", ";
-                        }
-
-                        if (field.Extra)
-                        {
-                            valueExtraFields += "null";
-                            if (i < header.Fields.Count - 1)
-                            {
-                                valueExtraFields += ", ";
-                            }
-                        }
+                        endField = ",";
                     }
-
-
-
-                    int id = 0;
-                    List<string> inserts = new List<string>();
-                    foreach (DataRow row in tabular.Rows)
+                    else
                     {
-                        if (id > 0)
-                        {
-                            string values = string.Empty;
-                            for (int i = 0; i < row.ItemArray.Length; i++)
-                            {
-                                var field = row.ItemArray[i];
-
-                                string value = string.Empty;
-
-                                object box = (object)field;
-                                if (box.GetType() == typeof(DateTime))
-                                {
-                                    DateTime dateTime = (DateTime)field;
-                                    value = $"'{dateTime.ToShortDateString()}'";
-                                }
-                                else
-                                {
-                                    value = $"'{field.ToString().Trim()}'";
-                                }
-
-                                value += ", ";
-
-                                if (i == row.ItemArray.Length - 1)
-                                {
-                                    value += $"{id}";
-                                    if (!string.IsNullOrEmpty(valueExtraFields))
-                                    {
-                                        value += $", {valueExtraFields}";
-                                    }
-                                }
-
-                                values += value;
-                            }
-                            string insert = $"INSERT INTO {config.ExcelTabular} ({insertFieldNames}) VALUES ({values});";
-                            inserts.Add(insert);
-                        }
-                        id++;
+                        endField = ");";
                     }
-                    inserts.Add("COMMIT;");
-                    File.WriteAllLines($"{config.OutPath}\\{config.OutInsertFilename}", inserts);
+                    if (field.Text == Constant.ID)
+                    {
+                        if (config.DatabaseName == DatabaseEnum.Database.Oracle)
+                        {
+                            lines.Add($"{field.Name} NUMBER({field.Length}){endField}");
+                        }
+                        if (config.DatabaseName == DatabaseEnum.Database.Postgres)
+                        {
+                            lines.Add($"{field.Name} BIGINT{endField}");
+                        }
+                    }
+                    else
+                    {
+                        if(config.DatabaseName == DatabaseEnum.Database.Oracle)
+                        {
+                            lines.Add($"{field.Name} VARCHAR2({field.Length}){endField}");
+                        }
+                        if (config.DatabaseName == DatabaseEnum.Database.Postgres)
+                        {
+                            lines.Add($"{field.Name} VARCHAR({field.Length}){endField}");
+                        }
+                    }
+                }
+            }
+
+            File.WriteAllLines($"{config.OutPath}\\{config.OutCreateFilename}", lines);
+        }
+
+        private Header GetHeader(DataTable tabular)
+        {
+            Header header = new Header();
+            int columnId = 0;
+            foreach (var item in tabular.Rows[0].ItemArray)
+            {
+                Field field = new Field
+                {
+                    Row = 0,
+                    Column = columnId,
+                    Text = item.ToString().Trim().Replace(" ", "_"),
+                    Length = item.ToString().Length,
+                };
+                header.Fields.Add(field);
+                columnId++;
+            };
+
+            SetFieldLength(tabular, header);
+            AddIdField(header);
+            AddExtraFields(header);
+            return header;
+        }
+
+        private void AddExtraFields(Header header)
+        {
+            if (!string.IsNullOrEmpty(config.OutExtraFields))
+            {
+                var outExtraFields = config.OutExtraFields.Split(',');
+                foreach (string outExtraField in outExtraFields)
+                {
+                    Field fieldExtra = new Field
+                    {
+                        Row = 0,
+                        Column = header.Fields.Count,
+                        Text = outExtraField,
+                        Length = outExtraField.Length,
+                        Extra = true
+                    };
+
+                    header.Fields.Add(fieldExtra);
+                }
+            }
+        }
+
+        private void AddIdField(Header header)
+        {
+            Field fieldId = new Field
+            {
+                Row = 0,
+                Column = header.Fields.Count,
+                Text = Constant.ID,
+                Length = Constant.ID_LENGHT
+            };
+
+            header.Fields.Add(fieldId);
+        }
+
+        private void SetFieldLength(DataTable tabular, Header header)
+        {
+            foreach (Field field in header.Fields)
+            {
+                foreach (DataRow row in tabular.Rows)
+                {
+                    int length = 0;
+
+                    object box = (object)row.ItemArray[field.Column];
+                    if (box.GetType() == typeof(DateTime))
+                    {
+                        DateTime dateTime = (DateTime)row.ItemArray[field.Column];
+                        length = dateTime.ToShortDateString().Length;
+                    }
+                    else
+                    {
+                        length = row.ItemArray[field.Column].ToString().Trim().Length;
+                    }
+
+                    if (field.Length < length)
+                    {
+                        field.Length = length;
+                    }
                 }
             }
         }

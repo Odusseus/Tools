@@ -5,6 +5,7 @@ namespace ExcelToSql
 {
     internal sealed class Config
     {
+        internal readonly DatabaseEnum.Database DatabaseName;
         internal readonly string ExcelFilename;
         internal readonly string ExcelPath;
         internal readonly string ExcelTabular;
@@ -19,6 +20,15 @@ namespace ExcelToSql
 
         private Config()
         {
+            string databaseName = ConfigurationManager.AppSettings[Constant.DATABASE_NAME];
+            this.DatabaseName = DatabaseEnum.Database.Oracle;
+
+            if(databaseName == Constant.POSTGRES)
+            {
+                this.DatabaseName = DatabaseEnum.Database.Postgres;
+            }
+
+
             this.ExcelFilename = ConfigurationManager.AppSettings[Constant.EXCEL_FILENAME];
             this.ExcelPath = ConfigurationManager.AppSettings[Constant.EXCEL_PATH];
             this.ExcelTabular = ConfigurationManager.AppSettings[Constant.EXCEL_TABULAR];
