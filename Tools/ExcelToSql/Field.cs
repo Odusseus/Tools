@@ -16,7 +16,7 @@
             set
             {
                 this.text = value.ToString();
-                this.Name = value.Trim().ToLower().Replace(" ", "_");
+                this.Name = value.Trim().ToLower().Replace(" ", "_").Replace("'", "_");
             }
         }
         public string Name { get; set; }

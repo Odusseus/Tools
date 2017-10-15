@@ -221,7 +221,7 @@ namespace ExcelToSql
                 {
                     Row = 0,
                     Column = columnId,
-                    Text = item.ToString().Trim().Replace(" ", "_").Replace("'", "_"),
+                    Text = item.ToString(),
                     Length = item.ToString().Length,
                 };
                 header.Fields.Add(field);
@@ -241,12 +241,23 @@ namespace ExcelToSql
                 var outExtraFields = config.OutExtraFields.Split(',');
                 foreach (string outExtraField in outExtraFields)
                 {
+                    string[] extraFields = outExtraField.Split('=');
+                    string extraField = extraFields[0];
+                    int extraFieldLength = extraField.Length;
+                    if(extraFields.Length == 2)
+                    {
+                        if (!int.TryParse(extraFields[1], out extraFieldLength))
+                        {
+                            extraFieldLength = extraField.Length;
+                        };
+                    }
+
                     Field fieldExtra = new Field
                     {
                         Row = 0,
                         Column = header.Fields.Count,
-                        Text = outExtraField,
-                        Length = outExtraField.Length,
+                        Text = extraField,
+                        Length = extraFieldLength,
                         Extra = true
                     };
 

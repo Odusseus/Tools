@@ -34,7 +34,9 @@ namespace ExcelToSql
             Console.WriteLine("- Out.Create.Filename : Output create filename");
             Console.WriteLine("- Out.Insert.Filename : Output insert filename");
             Console.WriteLine("- Out.Path :            Output path");
-            Console.WriteLine("- Out.Extra.Fields :    List of extra field to create. The fields are comma separated.");
+            Console.WriteLine("- Out.Tablename :       Name from te table");
+            Console.WriteLine("- Out.Extra.Fields :    List of extra field to create. The fields are comma separated with optional field length (fielname=fieldlegth).");
+            Console.WriteLine("- Exemple :             State,Message=2000");
             Environment.Exit(-1);
         }
     }
