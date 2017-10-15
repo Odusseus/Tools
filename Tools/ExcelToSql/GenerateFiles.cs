@@ -30,8 +30,7 @@ namespace ExcelToSql
             int inserts = InsertSqlScript(header, tabular);
             Console.WriteLine($"Insert {inserts} rows in file {config.OutInsertFilename} is ready.");
         }
-
-        public DataTable GetTabular()
+        internal DataTable GetTabular()
         {
             DataTable tabular;
 
@@ -85,8 +84,148 @@ namespace ExcelToSql
 
             return tabular;
         }
+        internal Header GetHeader(DataTable tabular)
+        {
+            Header header = new Header();
+            int columnId = 0;
+            foreach (var item in tabular.Rows[0].ItemArray)
+            {
+                Field field = new Field
+                {
+                    Row = 0,
+                    Column = columnId,
+                    Text = item.ToString(),
+                    Length = item.ToString().Length,
+                };
+                header.Fields.Add(field);
+                columnId++;
+            };
 
-        public int InsertSqlScript(Header header, DataTable tabular)
+            SetFieldLength(tabular, header);
+            AddIdField(header);
+            AddExtraFields(header);
+            return header;
+        }
+        internal void SetFieldLength(DataTable tabular, Header header)
+        {
+            foreach (Field field in header.Fields)
+            {
+                foreach (DataRow row in tabular.Rows)
+                {
+                    int length = 0;
+
+                    object box = (object)row.ItemArray[field.Column];
+                    if (box.GetType() == typeof(DateTime))
+                    {
+                        DateTime dateTime = (DateTime)row.ItemArray[field.Column];
+                        length = dateTime.ToShortDateString().Length;
+                    }
+                    else
+                    {
+                        string text = row.ItemArray[field.Column].ToString();
+                        int singlecotes = text.Count(x => x == '\'');
+
+                        length = row.ItemArray[field.Column].ToString().Trim().Length + singlecotes;
+                    }
+
+                    if (field.Length < length)
+                    {
+                        field.Length = length;
+                    }
+                }
+            }
+        }
+        internal void AddIdField(Header header)
+        {
+            Field fieldId = new Field
+            {
+                Row = 0,
+                Column = header.Fields.Count,
+                Text = Constant.ID,
+                Length = Constant.ID_LENGHT
+            };
+
+            header.Fields.Add(fieldId);
+        }
+        internal void AddExtraFields(Header header)
+        {
+            if (!string.IsNullOrEmpty(config.OutExtraFields))
+            {
+                var outExtraFields = config.OutExtraFields.Split(',');
+                foreach (string outExtraField in outExtraFields)
+                {
+                    string[] extraFields = outExtraField.Split('=');
+                    string extraField = extraFields[0];
+                    int extraFieldLength = extraField.Length;
+                    if(extraFields.Length == 2)
+                    {
+                        if (!int.TryParse(extraFields[1], out extraFieldLength))
+                        {
+                            extraFieldLength = extraField.Length;
+                        };
+                    }
+
+                    Field fieldExtra = new Field
+                    {
+                        Row = 0,
+                        Column = header.Fields.Count,
+                        Text = extraField,
+                        Length = extraFieldLength,
+                        Extra = true
+                    };
+
+                    header.Fields.Add(fieldExtra);
+                }
+            }
+        }
+        internal void CreateSqlScript(Header header)
+        {
+            List<string> lines = new List<string>();
+            string endField = string.Empty;
+
+            for (int i = 0; i < header.Fields.Count; i++)
+            {
+                Field field = header.Fields[i];
+
+                if (i == 0)
+                {
+                    lines.Add($"CREATE TABLE {config.OutTablename} (");
+                }
+                if (i < header.Fields.Count - 1)
+                {
+                    endField = ",";
+                }
+                else
+                {
+                    endField = ");";
+                }
+                if (field.Text == Constant.ID)
+                {
+                    if (config.DatabaseVendor == DatabaseEnum.Vendor.Oracle)
+                    {
+                        lines.Add($"{field.Name} NUMBER({field.Length}){endField}");
+                    }
+                    if (config.DatabaseVendor == DatabaseEnum.Vendor.Postgres)
+                    {
+                        lines.Add($"{field.Name} BIGINT{endField}");
+                    }
+                }
+                else
+                {
+                    if(config.DatabaseVendor == DatabaseEnum.Vendor.Oracle)
+                    {
+                        lines.Add($"{field.Name} VARCHAR2({field.Length}){endField}");
+                    }
+                    if (config.DatabaseVendor == DatabaseEnum.Vendor.Postgres)
+                    {
+                        lines.Add($"{field.Name} VARCHAR({field.Length}){endField}");
+                    }
+                }
+            }
+
+            File.WriteAllLines($"{config.OutPath}\\{config.OutCreateFilename}", lines);
+        }
+        internal int InsertSqlScript(Header header, DataTable tabular)
         {
             string insertFieldNames = string.Empty;
             string valueExtraFields = string.Empty;
@@ -160,153 +299,6 @@ namespace ExcelToSql
             File.WriteAllLines($"{config.OutPath}\\{config.OutInsertFilename}", inserts);
 
             return id;
-        }
-
-
-        public void CreateSqlScript(Header header)
-        {
-            List<string> lines = new List<string>();
-            string endField = string.Empty;
-
-            for (int i = 0; i < header.Fields.Count; i++)
-            {
-                Field field = header.Fields[i];
-
-                if (i == 0)
-                {
-                    lines.Add($"CREATE TABLE {config.OutTablename} (");
-                }
-                if (i < header.Fields.Count - 1)
-                {
-                    endField = ",";
-                }
-                else
-                {
-                    endField = ");";
-                }
-                if (field.Text == Constant.ID)
-                {
-                    if (config.DatabaseVendor == DatabaseEnum.Vendor.Oracle)
-                    {
-                        lines.Add($"{field.Name} NUMBER({field.Length}){endField}");
-                    }
-                    if (config.DatabaseVendor == DatabaseEnum.Vendor.Postgres)
-                    {
-                        lines.Add($"{field.Name} BIGINT{endField}");
-                    }
-                }
-                else
-                {
-                    if(config.DatabaseVendor == DatabaseEnum.Vendor.Oracle)
-                    {
-                        lines.Add($"{field.Name} VARCHAR2({field.Length}){endField}");
-                    }
-                    if (config.DatabaseVendor == DatabaseEnum.Vendor.Postgres)
-                    {
-                        lines.Add($"{field.Name} VARCHAR({field.Length}){endField}");
-                    }
-                }
-            }
-
-            File.WriteAllLines($"{config.OutPath}\\{config.OutCreateFilename}", lines);
-        }
-
-        public Header GetHeader(DataTable tabular)
-        {
-            Header header = new Header();
-            int columnId = 0;
-            foreach (var item in tabular.Rows[0].ItemArray)
-            {
-                Field field = new Field
-                {
-                    Row = 0,
-                    Column = columnId,
-                    Text = item.ToString(),
-                    Length = item.ToString().Length,
-                };
-                header.Fields.Add(field);
-                columnId++;
-            };
-
-            SetFieldLength(tabular, header);
-            AddIdField(header);
-            AddExtraFields(header);
-            return header;
-        }
-
-        public void AddExtraFields(Header header)
-        {
-            if (!string.IsNullOrEmpty(config.OutExtraFields))
-            {
-                var outExtraFields = config.OutExtraFields.Split(',');
-                foreach (string outExtraField in outExtraFields)
-                {
-                    string[] extraFields = outExtraField.Split('=');
-                    string extraField = extraFields[0];
-                    int extraFieldLength = extraField.Length;
-                    if(extraFields.Length == 2)
-                    {
-                        if (!int.TryParse(extraFields[1], out extraFieldLength))
-                        {
-                            extraFieldLength = extraField.Length;
-                        };
-                    }
-
-                    Field fieldExtra = new Field
-                    {
-                        Row = 0,
-                        Column = header.Fields.Count,
-                        Text = extraField,
-                        Length = extraFieldLength,
-                        Extra = true
-                    };
-
-                    header.Fields.Add(fieldExtra);
-                }
-            }
-        }
-
-        public void AddIdField(Header header)
-        {
-            Field fieldId = new Field
-            {
-                Row = 0,
-                Column = header.Fields.Count,
-                Text = Constant.ID,
-                Length = Constant.ID_LENGHT
-            };
-
-            header.Fields.Add(fieldId);
-        }
-
-        public void SetFieldLength(DataTable tabular, Header header)
-        {
-            foreach (Field field in header.Fields)
-            {
-                foreach (DataRow row in tabular.Rows)
-                {
-                    int length = 0;
-
-                    object box = (object)row.ItemArray[field.Column];
-                    if (box.GetType() == typeof(DateTime))
-                    {
-                        DateTime dateTime = (DateTime)row.ItemArray[field.Column];
-                        length = dateTime.ToShortDateString().Length;
-                    }
-                    else
-                    {
-                        string text = row.ItemArray[field.Column].ToString();
-                        int singlecotes = text.Count(x => x == '\'');
-
-                        length = row.ItemArray[field.Column].ToString().Trim().Length + singlecotes;
-                    }
-
-                    if (field.Length < length)
-                    {
-                        field.Length = length;
-                    }
-                }
-            }
         }
     }
 }
