@@ -17,5 +17,6 @@
         public const int ID_LENGHT = 9;
         public static string ORACLE = "Oracle";
         public static string POSTGRES = "Postgres";
+        public static string OUT_TABLENAME = "Out.Tablename";
     }
 }

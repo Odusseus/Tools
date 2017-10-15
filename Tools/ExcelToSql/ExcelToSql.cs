@@ -14,9 +14,9 @@ namespace ExcelToSql
 
             Config config = Config.Instance;
 
-            GenerateFiles read = new GenerateFiles(config);
+            GenerateFiles generateFiles = new GenerateFiles(config);
 
-            read.Run();
+            generateFiles.Run();
         }
 
         static void Help()

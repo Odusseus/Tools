@@ -27,8 +27,8 @@ namespace ExcelToSql
             CreateSqlScript(header);
             Console.WriteLine($"Create file {config.OutCreateFilename} is ready.");
 
-            InsertSqlScript(header, tabular);
-            Console.WriteLine($"Insert file {config.OutInsertFilename} is ready.");
+            int inserts = InsertSqlScript(header, tabular);
+            Console.WriteLine($"Insert {inserts} rows in file {config.OutInsertFilename} is ready.");
         }
 
         public DataTable GetTabular()
@@ -86,7 +86,7 @@ namespace ExcelToSql
             return tabular;
         }
 
-        public void InsertSqlScript(Header header, DataTable tabular)
+        public int InsertSqlScript(Header header, DataTable tabular)
         {
             string insertFieldNames = string.Empty;
             string valueExtraFields = string.Empty;
@@ -148,7 +148,7 @@ namespace ExcelToSql
 
                         values += value;
                     }
-                    string insert = $"INSERT INTO {config.ExcelTabular.ToLower()} ({insertFieldNames}) VALUES ({values});";
+                    string insert = $"INSERT INTO {config.OutTablename} ({insertFieldNames}) VALUES ({values});";
                     inserts.Add(insert);
                 }
                 id++;
@@ -158,6 +158,8 @@ namespace ExcelToSql
                 inserts.Add("COMMIT;");
             }
             File.WriteAllLines($"{config.OutPath}\\{config.OutInsertFilename}", inserts);
+
+            return id;
         }
 
 
@@ -172,7 +174,7 @@ namespace ExcelToSql
 
                 if (i == 0)
                 {
-                    lines.Add($"CREATE TABLE {config.ExcelTabular.ToLower()} (");
+                    lines.Add($"CREATE TABLE {config.OutTablename} (");
                 }
                 if (i < header.Fields.Count - 1)
                 {

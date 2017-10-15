@@ -12,8 +12,9 @@ namespace ExcelToSql
 
         public readonly string OutCreateFilename;
         public readonly string OutInsertFilename;
-        public readonly string OutPath;
         public readonly string OutExtraFields;
+        public readonly string OutTablename;
+        public readonly string OutPath;
 
         private static volatile Config instance;
         private static object syncRoot = new Object();
@@ -34,8 +35,9 @@ namespace ExcelToSql
 
             this.OutCreateFilename = ConfigurationManager.AppSettings[Constant.OUT_CREATE_FILENAME];
             this.OutInsertFilename = ConfigurationManager.AppSettings[Constant.OUT_INSTERT_FILENAME];
-            this.OutPath = ConfigurationManager.AppSettings[Constant.OUT_PATH];
             this.OutExtraFields = ConfigurationManager.AppSettings[Constant.OUT_EXTRA_FIELDS];
+            this.OutTablename = ConfigurationManager.AppSettings[Constant.OUT_TABLENAME];
+            this.OutPath = ConfigurationManager.AppSettings[Constant.OUT_PATH];
         }
 
         public static Config Instance
