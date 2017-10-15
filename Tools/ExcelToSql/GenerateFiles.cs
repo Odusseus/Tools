@@ -7,27 +7,31 @@ using System.Collections.Generic;
 
 namespace ExcelToSql
 {
-    class Read
+    public class GenerateFiles
     {
         private Config config;
 
-        public Read(Config config)
+        public GenerateFiles(Config config)
         {
             this.config = config;
         }
 
-        internal void Run()
+        public void Run()
         {
             DataTable tabular = GetTabular();
+            Console.WriteLine($"Tabular {config.ExcelTabular} is read.");
 
             Header header = GetHeader(tabular);
+            Console.WriteLine($"Header is read.");
 
             CreateSqlScript(header);
+            Console.WriteLine($"Create file {config.OutCreateFilename} is ready.");
 
             InsertSqlScript(header, tabular);
+            Console.WriteLine($"Insert file {config.OutInsertFilename} is ready.");
         }
 
-        private DataTable GetTabular()
+        public DataTable GetTabular()
         {
             DataTable tabular;
 
@@ -82,7 +86,7 @@ namespace ExcelToSql
             return tabular;
         }
 
-        private void InsertSqlScript(Header header, DataTable tabular)
+        public void InsertSqlScript(Header header, DataTable tabular)
         {
             string insertFieldNames = string.Empty;
             string valueExtraFields = string.Empty;
@@ -128,7 +132,7 @@ namespace ExcelToSql
                         }
                         else
                         {
-                            value = $"'{field.ToString().Trim()}'";
+                            value = $"'{field.ToString().Replace("'","''").Trim()}'";
                         }
 
                         value += ", ";
@@ -149,7 +153,7 @@ namespace ExcelToSql
                 }
                 id++;
             }
-            if(config.DatabaseName == DatabaseEnum.Database.Oracle)
+            if(config.DatabaseVendor == DatabaseEnum.Vendor.Oracle)
             {
                 inserts.Add("COMMIT;");
             }
@@ -157,7 +161,7 @@ namespace ExcelToSql
         }
 
 
-        private void CreateSqlScript(Header header)
+        public void CreateSqlScript(Header header)
         {
             List<string> lines = new List<string>();
             string endField = string.Empty;
@@ -180,22 +184,22 @@ namespace ExcelToSql
                 }
                 if (field.Text == Constant.ID)
                 {
-                    if (config.DatabaseName == DatabaseEnum.Database.Oracle)
+                    if (config.DatabaseVendor == DatabaseEnum.Vendor.Oracle)
                     {
                         lines.Add($"{field.Name} NUMBER({field.Length}){endField}");
                     }
-                    if (config.DatabaseName == DatabaseEnum.Database.Postgres)
+                    if (config.DatabaseVendor == DatabaseEnum.Vendor.Postgres)
                     {
                         lines.Add($"{field.Name} BIGINT{endField}");
                     }
                 }
                 else
                 {
-                    if(config.DatabaseName == DatabaseEnum.Database.Oracle)
+                    if(config.DatabaseVendor == DatabaseEnum.Vendor.Oracle)
                     {
                         lines.Add($"{field.Name} VARCHAR2({field.Length}){endField}");
                     }
-                    if (config.DatabaseName == DatabaseEnum.Database.Postgres)
+                    if (config.DatabaseVendor == DatabaseEnum.Vendor.Postgres)
                     {
                         lines.Add($"{field.Name} VARCHAR({field.Length}){endField}");
                     }
@@ -205,7 +209,7 @@ namespace ExcelToSql
             File.WriteAllLines($"{config.OutPath}\\{config.OutCreateFilename}", lines);
         }
 
-        private Header GetHeader(DataTable tabular)
+        public Header GetHeader(DataTable tabular)
         {
             Header header = new Header();
             int columnId = 0;
@@ -215,7 +219,7 @@ namespace ExcelToSql
                 {
                     Row = 0,
                     Column = columnId,
-                    Text = item.ToString().Trim().Replace(" ", "_"),
+                    Text = item.ToString().Trim().Replace(" ", "_").Replace("'", "_"),
                     Length = item.ToString().Length,
                 };
                 header.Fields.Add(field);
@@ -228,7 +232,7 @@ namespace ExcelToSql
             return header;
         }
 
-        private void AddExtraFields(Header header)
+        public void AddExtraFields(Header header)
         {
             if (!string.IsNullOrEmpty(config.OutExtraFields))
             {
@@ -249,7 +253,7 @@ namespace ExcelToSql
             }
         }
 
-        private void AddIdField(Header header)
+        public void AddIdField(Header header)
         {
             Field fieldId = new Field
             {
@@ -262,7 +266,7 @@ namespace ExcelToSql
             header.Fields.Add(fieldId);
         }
 
-        private void SetFieldLength(DataTable tabular, Header header)
+        public void SetFieldLength(DataTable tabular, Header header)
         {
             foreach (Field field in header.Fields)
             {
@@ -278,7 +282,10 @@ namespace ExcelToSql
                     }
                     else
                     {
-                        length = row.ItemArray[field.Column].ToString().Trim().Length;
+                        string text = row.ItemArray[field.Column].ToString();
+                        int singlecotes = text.Count(x => x == '\'');
+
+                        length = row.ItemArray[field.Column].ToString().Trim().Length + singlecotes;
                     }
 
                     if (field.Length < length)

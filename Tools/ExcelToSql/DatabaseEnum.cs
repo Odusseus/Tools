@@ -2,7 +2,7 @@
 {
     public class DatabaseEnum
     {
-        public enum Database
+        public enum Vendor
         {
             Oracle,
             Postgres

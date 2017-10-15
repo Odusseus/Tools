@@ -1,9 +1,8 @@
 ﻿namespace ExcelToSql
 {
-    internal class Element
+    public class Element
     {
         public Field Name { get; set; }
         public Field Value { get; set; }
-
     }
 }

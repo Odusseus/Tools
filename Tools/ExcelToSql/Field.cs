@@ -1,6 +1,6 @@
 ﻿namespace ExcelToSql
 { 
-    internal class Field
+    public class Field
     {
         private string text;
 

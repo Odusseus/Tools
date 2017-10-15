@@ -2,7 +2,7 @@
 
 namespace ExcelToSql
 {
-    internal class Row
+    public class Row
     {
         public List<Element> Elements { get; set; }
     }

@@ -2,7 +2,7 @@
 
 namespace ExcelToSql
 {
-    internal class Header
+    public class Header
     {
         public List<Field> Fields { get; set; }
 

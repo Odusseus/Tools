@@ -3,7 +3,7 @@ using System.Reflection;
 
 namespace ExcelToSql
 {
-    class ExcelToSql
+    public class ExcelToSql
     {
         static void Main(string[] args)
         {
@@ -14,7 +14,7 @@ namespace ExcelToSql
 
             Config config = Config.Instance;
 
-            Read read = new Read(config);
+            GenerateFiles read = new GenerateFiles(config);
 
             read.Run();
         }
@@ -22,14 +22,19 @@ namespace ExcelToSql
         static void Help()
         {
             var version = Assembly.GetEntryAssembly().GetName().Version;
-            Console.WriteLine($"ExcelToSql version {version}");
-            Console.WriteLine("ExcelToSql read a Excel spreadsheet and generate sql-scripts to create and insert values in a database.");
-            Console.WriteLine("ExcelToSql go : execute the program");
-            Console.WriteLine("ExcelToSql go : execute the program");
-            Console.WriteLine("Configuration are in ExcelToSql.Exe.Config");
-            Console.WriteLine("- Filename : Excel filename");
-            Console.WriteLine("- Path : path to the Excel file");
-            Console.WriteLine("- Tabular : Tabular's name");
+            Console.WriteLine($"ExcelToSql version {version}, 15-10-2017, author Odusseus, https://github.com/Odusseus ");
+            Console.WriteLine("ExcelToSql read a Excel spreadsheet and generate basic create and insert sql-scripts.");
+            Console.WriteLine("ExcelToSql go          execute the program");
+            Console.WriteLine("ExcelToSql             call the help");
+            Console.WriteLine("Configuration are in the ExcelToSql.Exe.Config file.");
+            Console.WriteLine("- Database.Vendor :     Oracle or Postgres");
+            Console.WriteLine("- Excel.Filename  :     Excel filename");
+            Console.WriteLine("- Excel.Path :          path to the Excel file");
+            Console.WriteLine("- Excel.Tabular :       Name from the tabular");
+            Console.WriteLine("- Out.Create.Filename : Output create filename");
+            Console.WriteLine("- Out.Insert.Filename : Output insert filename");
+            Console.WriteLine("- Out.Path :            Output path");
+            Console.WriteLine("- Out.Extra.Fields :    List of extra field to create. The fields are comma separated.");
             Environment.Exit(-1);
         }
     }

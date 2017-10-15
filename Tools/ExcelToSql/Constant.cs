@@ -1,21 +1,21 @@
 ﻿namespace ExcelToSql
 {
-    internal static class Constant
+    public static class Constant
     {
-        internal const string DATABASE_NAME = "Database.Name";
-        internal const string EXCEL_FILENAME = "Excel.Filename";
+        public const string DATABASE_VENDOR = "Database.Vendor";
+        public const string EXCEL_FILENAME = "Excel.Filename";
         public const string EXCEL_PATH = "Excel.Path";
-        internal const string EXCEL_TABULAR = "Excel.Tabular";
-        internal const string OUT_CREATE_FILENAME = "Out.Create.Filename";
-        internal const string OUT_INSTERT_FILENAME = "Out.Insert.Filename";
+        public const string EXCEL_TABULAR = "Excel.Tabular";
+        public const string OUT_CREATE_FILENAME = "Out.Create.Filename";
+        public const string OUT_INSTERT_FILENAME = "Out.Insert.Filename";
         public const string OUT_PATH = "Out.Path";
-        internal const string OUT_EXTRA_FIELDS = "Out.Extra.Fields";
+        public const string OUT_EXTRA_FIELDS = "Out.Extra.Fields";
 
-        internal const string GO = "GO";
+        public const string GO = "GO";
 
-        internal const string ID = "ID";
-        internal const int ID_LENGHT = 9;
-        internal static string ORACLE = "Oracle";
-        internal static string POSTGRES = "Postgres";
+        public const string ID = "ID";
+        public const int ID_LENGHT = 9;
+        public static string ORACLE = "Oracle";
+        public static string POSTGRES = "Postgres";
     }
 }

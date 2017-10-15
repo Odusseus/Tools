@@ -3,32 +3,31 @@ using System.Configuration;
 
 namespace ExcelToSql
 {
-    internal sealed class Config
+    public sealed class Config
     {
-        internal readonly DatabaseEnum.Database DatabaseName;
-        internal readonly string ExcelFilename;
-        internal readonly string ExcelPath;
-        internal readonly string ExcelTabular;
+        public readonly DatabaseEnum.Vendor DatabaseVendor;
+        public readonly string ExcelFilename;
+        public readonly string ExcelPath;
+        public readonly string ExcelTabular;
 
-        internal readonly string OutCreateFilename;
-        internal readonly string OutInsertFilename;
-        internal readonly string OutPath;
-        internal readonly string OutExtraFields;
+        public readonly string OutCreateFilename;
+        public readonly string OutInsertFilename;
+        public readonly string OutPath;
+        public readonly string OutExtraFields;
 
         private static volatile Config instance;
         private static object syncRoot = new Object();
 
-        private Config()
+        internal Config()
         {
-            string databaseName = ConfigurationManager.AppSettings[Constant.DATABASE_NAME];
-            this.DatabaseName = DatabaseEnum.Database.Oracle;
+            string databaseName = ConfigurationManager.AppSettings[Constant.DATABASE_VENDOR];
+            this.DatabaseVendor = DatabaseEnum.Vendor.Oracle;
 
             if(databaseName == Constant.POSTGRES)
             {
-                this.DatabaseName = DatabaseEnum.Database.Postgres;
+                this.DatabaseVendor = DatabaseEnum.Vendor.Postgres;
             }
-
-
+            
             this.ExcelFilename = ConfigurationManager.AppSettings[Constant.EXCEL_FILENAME];
             this.ExcelPath = ConfigurationManager.AppSettings[Constant.EXCEL_PATH];
             this.ExcelTabular = ConfigurationManager.AppSettings[Constant.EXCEL_TABULAR];
@@ -39,7 +38,7 @@ namespace ExcelToSql
             this.OutExtraFields = ConfigurationManager.AppSettings[Constant.OUT_EXTRA_FIELDS];
         }
 
-        internal static Config Instance
+        public static Config Instance
         {
             get
             {
