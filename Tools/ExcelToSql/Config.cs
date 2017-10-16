@@ -39,7 +39,7 @@ namespace ExcelToSql
             this.OutInsertFilename = ConfigurationManager.AppSettings[Constant.OUT_INSTERT_FILENAME];
             this.OutExtraFields = ConfigurationManager.AppSettings[Constant.OUT_EXTRA_FIELDS];
             this.OutExtraNumberFields = ConfigurationManager.AppSettings[Constant.OUT_EXTRA_NUMBER_FIELDS];
-            this.OutTablename = ConfigurationManager.AppSettings[Constant.OUT_TABLENAME];
+            this.OutTablename = ConfigurationManager.AppSettings[Constant.OUT_TABLENAME].ToLower();
             this.OutPath = ConfigurationManager.AppSettings[Constant.OUT_PATH];
 
             string outStartId = ConfigurationManager.AppSettings[Constant.OUT_START_ID];

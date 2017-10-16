@@ -95,7 +95,7 @@ namespace ExcelToSql
                     Row = 0,
                     Column = columnId,
                     Text = item.ToString(),
-                    Length = item.ToString().Length,
+                    Length = item.ToString().Length.RoundUp(),
                     Type = DatabaseEnum.TypeField.Text
                 };
                 header.Fields.Add(field);
@@ -127,7 +127,7 @@ namespace ExcelToSql
                         string text = row.ItemArray[field.Column].ToString();
                         int singlecotes = text.Count(x => x == '\'');
 
-                        length = row.ItemArray[field.Column].ToString().Trim().Length + singlecotes;
+                        length = (row.ItemArray[field.Column].ToString().Trim().Length + singlecotes).RoundUp();
                     }
 
                     if (field.Length < length)
@@ -173,7 +173,7 @@ namespace ExcelToSql
                         Row = 0,
                         Column = header.Fields.Count,
                         Text = extraField,
-                        Length = extraFieldLength,
+                        Length = extraFieldLength.RoundUp(),
                         Extra = true,
                         Type = DatabaseEnum.TypeField.Text
                     };
@@ -263,7 +263,8 @@ namespace ExcelToSql
             {
                 if (config.DatabaseVendor == DatabaseEnum.Vendor.Oracle || config.DatabaseVendor == DatabaseEnum.Vendor.Postgres)
                 {
-                    lines.Add($"CREATE UNIQUE INDEX {config.OutTablename}_unique_index ON {config.OutTablename} ({Constant.ID.ToLower()});");
+                 lines.Add("");
+                 lines.Add($"CREATE UNIQUE INDEX {config.OutTablename}_pk_index ON {config.OutTablename} ({Constant.ID.ToLower()});");
                 }
             }
 
@@ -295,11 +296,17 @@ namespace ExcelToSql
                 }
             }
 
-            int id = 0;
+            int id = -1; // First row must be 0
             List<string> inserts = new List<string>();
             foreach (DataRow row in tabular.Rows)
             {
-                if (id > 0)
+                id++;
+
+                if (id == 0)
+                {
+                    // First row is the header, do nothing.
+                }
+                else
                 {
                     string values = string.Empty;
                     for (int i = 0; i < row.ItemArray.Length; i++)
@@ -335,10 +342,10 @@ namespace ExcelToSql
                     string insert = $"INSERT INTO {config.OutTablename} ({insertFieldNames}) VALUES ({values});";
                     inserts.Add(insert);
                 }
-                id++;
             }
             if(config.DatabaseVendor == DatabaseEnum.Vendor.Oracle)
             {
+                inserts.Add("");
                 inserts.Add("COMMIT;");
             }
             File.WriteAllLines($"{config.OutPath}\\{config.OutInsertFilename}", inserts);
