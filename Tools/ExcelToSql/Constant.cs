@@ -10,6 +10,9 @@
         public const string OUT_INSTERT_FILENAME = "Out.Insert.Filename";
         public const string OUT_PATH = "Out.Path";
         public const string OUT_EXTRA_FIELDS = "Out.Extra.Fields";
+        public static string OUT_EXTRA_NUMBER_FIELDS = "Out.Extra.Number.Fields";
+        public static string OUT_TABLENAME = "Out.Tablename";
+        public static string OUT_START_ID = "Out.Start.Id";
 
         public const string GO = "GO";
 
@@ -17,6 +20,5 @@
         public const int ID_LENGHT = 9;
         public static string ORACLE = "Oracle";
         public static string POSTGRES = "Postgres";
-        public static string OUT_TABLENAME = "Out.Tablename";
     }
 }

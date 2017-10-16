@@ -96,6 +96,7 @@ namespace ExcelToSql
                     Column = columnId,
                     Text = item.ToString(),
                     Length = item.ToString().Length,
+                    Type = DatabaseEnum.TypeField.Text
                 };
                 header.Fields.Add(field);
                 columnId++;
@@ -104,6 +105,7 @@ namespace ExcelToSql
             SetFieldLength(tabular, header);
             AddIdField(header);
             AddExtraFields(header);
+            AddExtraNumberFields(header);
             return header;
         }
         internal void SetFieldLength(DataTable tabular, Header header)
@@ -142,7 +144,8 @@ namespace ExcelToSql
                 Row = 0,
                 Column = header.Fields.Count,
                 Text = Constant.ID,
-                Length = Constant.ID_LENGHT
+                Length = Constant.ID_LENGHT,
+                Type = DatabaseEnum.TypeField.Number
             };
 
             header.Fields.Add(fieldId);
@@ -157,7 +160,7 @@ namespace ExcelToSql
                     string[] extraFields = outExtraField.Split('=');
                     string extraField = extraFields[0];
                     int extraFieldLength = extraField.Length;
-                    if(extraFields.Length == 2)
+                    if (extraFields.Length == 2)
                     {
                         if (!int.TryParse(extraFields[1], out extraFieldLength))
                         {
@@ -171,7 +174,40 @@ namespace ExcelToSql
                         Column = header.Fields.Count,
                         Text = extraField,
                         Length = extraFieldLength,
-                        Extra = true
+                        Extra = true,
+                        Type = DatabaseEnum.TypeField.Text
+                    };
+
+                    header.Fields.Add(fieldExtra);
+                }
+            }
+        }
+        internal void AddExtraNumberFields(Header header)
+        {
+            if (!string.IsNullOrEmpty(config.OutExtraNumberFields))
+            {
+                var outExtraNumberFields = config.OutExtraNumberFields.Split(',');
+                foreach (string outExtraNumberField in outExtraNumberFields)
+                {
+                    string[] extraNumberFields = outExtraNumberField.Split('=');
+                    string extraNumberField = extraNumberFields[0];
+                    int extraNumberFieldLength = extraNumberField.Length;
+                    if (extraNumberFields.Length == 2)
+                    {
+                        if (!int.TryParse(extraNumberFields[1], out extraNumberFieldLength))
+                        {
+                            extraNumberFieldLength = extraNumberField.Length;
+                        };
+                    }
+
+                    Field fieldExtra = new Field
+                    {
+                        Row = 0,
+                        Column = header.Fields.Count,
+                        Text = extraNumberField,
+                        Length = extraNumberFieldLength,
+                        Extra = true,
+                        Type = DatabaseEnum.TypeField.Number
                     };
 
                     header.Fields.Add(fieldExtra);
@@ -199,7 +235,7 @@ namespace ExcelToSql
                 {
                     endField = ");";
                 }
-                if (field.Text == Constant.ID)
+                if (field.Type == DatabaseEnum.TypeField.Number)
                 {
                     if (config.DatabaseVendor == DatabaseEnum.Vendor.Oracle)
                     {
@@ -271,14 +307,14 @@ namespace ExcelToSql
                         }
                         else
                         {
-                            value = $"'{field.ToString().Replace("'","''").Trim()}'";
+                         value = $"'{field.ToString().Replace("'","''").Trim()}'";
                         }
 
                         value += ", ";
 
                         if (i == row.ItemArray.Length - 1)
                         {
-                            value += $"{id}";
+                            value += $"{config.OutStartId + id}";
                             if (!string.IsNullOrEmpty(valueExtraFields))
                             {
                                 value += $", {valueExtraFields}";

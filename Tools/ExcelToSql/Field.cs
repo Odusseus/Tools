@@ -24,6 +24,7 @@
         public int Length { get; set; }
 
         public bool Extra { get; set; }
-        
+
+        public DatabaseEnum.TypeField Type { get; set; }
     }
 }

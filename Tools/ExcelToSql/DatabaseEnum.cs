@@ -7,5 +7,11 @@
             Oracle,
             Postgres
         }
+
+        public enum TypeField
+        {
+            Text,
+            Number
+        }
     }
 }
