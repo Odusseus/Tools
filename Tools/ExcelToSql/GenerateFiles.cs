@@ -259,7 +259,16 @@ namespace ExcelToSql
                 }
             }
 
+            if (lines.Count > 0)
+            {
+                if (config.DatabaseVendor == DatabaseEnum.Vendor.Oracle || config.DatabaseVendor == DatabaseEnum.Vendor.Postgres)
+                {
+                    lines.Add($"CREATE UNIQUE INDEX {config.OutTablename}_unique_index ON {config.OutTablename} ({Constant.ID.ToLower()});");
+                }
+            }
+
             File.WriteAllLines($"{config.OutPath}\\{config.OutCreateFilename}", lines);
+
         }
         internal int InsertSqlScript(Header header, DataTable tabular)
         {
