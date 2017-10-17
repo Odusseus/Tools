@@ -4,6 +4,7 @@ using ExcelDataReader;
 using System.Linq;
 using System.Data;
 using System.Collections.Generic;
+using System.Text;
 
 namespace ExcelToSql
 {
@@ -106,6 +107,7 @@ namespace ExcelToSql
             AddIdField(header);
             AddExtraFields(header);
             AddExtraNumberFields(header);
+            AddExtraDateFields(header);
             return header;
         }
         internal void SetFieldLength(DataTable tabular, Header header)
@@ -214,6 +216,29 @@ namespace ExcelToSql
                 }
             }
         }
+
+        internal void AddExtraDateFields(Header header)
+        {
+            if (!string.IsNullOrEmpty(config.OutExtraDateFields))
+            {
+                var outExtraDateFields = config.OutExtraDateFields.Split(',');
+                foreach (string outExtraDateField in outExtraDateFields)
+                {
+                    Field fieldExtra = new Field
+                    {
+                        Row = 0,
+                        Column = header.Fields.Count,
+                        Text = outExtraDateField,
+                        Length = 20,
+                        Extra = true,
+                        Type = DatabaseEnum.TypeField.Date
+                    };
+
+                    header.Fields.Add(fieldExtra);
+                }
+            }
+        }
+
         internal void CreateSqlScript(Header header)
         {
             List<string> lines = new List<string>();
@@ -246,7 +271,18 @@ namespace ExcelToSql
                         lines.Add($"{field.Name} BIGINT{endField}");
                     }
                 }
-                else
+                else if (field.Type == DatabaseEnum.TypeField.Date)
+                {
+                    if (config.DatabaseVendor == DatabaseEnum.Vendor.Oracle)
+                    {
+                        lines.Add($"{field.Name} DATE{endField}");
+                    }
+                    if (config.DatabaseVendor == DatabaseEnum.Vendor.Postgres)
+                    {
+                        lines.Add($"{field.Name} Date{endField}");
+                    }
+                }
+                else if (field.Type == DatabaseEnum.TypeField.Text)
                 {
                     if(config.DatabaseVendor == DatabaseEnum.Vendor.Oracle)
                     {
@@ -268,7 +304,7 @@ namespace ExcelToSql
                 }
             }
 
-            File.WriteAllLines($"{config.OutPath}\\{config.OutCreateFilename}", lines);
+            File.WriteAllLines($"{config.OutPath}\\{config.OutCreateFilename}", lines, Encoding.GetEncoding(config.OutFileEncoding));
 
         }
         internal int InsertSqlScript(Header header, DataTable tabular)
@@ -348,7 +384,8 @@ namespace ExcelToSql
                 inserts.Add("");
                 inserts.Add("COMMIT;");
             }
-            File.WriteAllLines($"{config.OutPath}\\{config.OutInsertFilename}", inserts);
+
+            File.WriteAllLines($"{config.OutPath}\\{config.OutInsertFilename}", inserts, Encoding.GetEncoding(config.OutFileEncoding));
 
             return id;
         }

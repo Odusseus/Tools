@@ -10,8 +10,9 @@
 
         public enum TypeField
         {
-            Text,
-            Number
+            Date,
+            Number,
+            Text
         }
     }
 }

@@ -14,6 +14,9 @@ namespace ExcelToSql
         public readonly string OutInsertFilename;
         public readonly string OutExtraFields;
         public readonly string OutExtraNumberFields;
+        public readonly string OutExtraDateFields;
+        public readonly int OutFileEncoding;
+
         public readonly string OutTablename;
         public readonly string OutPath;
         public readonly int OutStartId;
@@ -39,6 +42,19 @@ namespace ExcelToSql
             this.OutInsertFilename = ConfigurationManager.AppSettings[Constant.OUT_INSTERT_FILENAME];
             this.OutExtraFields = ConfigurationManager.AppSettings[Constant.OUT_EXTRA_FIELDS];
             this.OutExtraNumberFields = ConfigurationManager.AppSettings[Constant.OUT_EXTRA_NUMBER_FIELDS];
+            this.OutExtraDateFields = ConfigurationManager.AppSettings[Constant.OUT_EXTRA_DATE_FIELDS];
+            string outFileEncoding = ConfigurationManager.AppSettings[Constant.OUT_FILE_ENCODING];
+
+            if (!string.IsNullOrEmpty(outFileEncoding))
+            {
+                int.TryParse(outFileEncoding, out this.OutStartId);
+            }
+            if(this.OutFileEncoding == 0)
+            {
+                this.OutFileEncoding = Constant.Utf8;
+            }
+
+                        
             this.OutTablename = ConfigurationManager.AppSettings[Constant.OUT_TABLENAME].ToLower();
             this.OutPath = ConfigurationManager.AppSettings[Constant.OUT_PATH];
 

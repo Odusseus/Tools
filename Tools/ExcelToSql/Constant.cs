@@ -11,6 +11,8 @@
         public const string OUT_PATH = "Out.Path";
         public const string OUT_EXTRA_FIELDS = "Out.Extra.Fields";
         public static string OUT_EXTRA_NUMBER_FIELDS = "Out.Extra.Number.Fields";
+        public static string OUT_EXTRA_DATE_FIELDS = "Out.Extra.Date.Fields";
+        public static string OUT_FILE_ENCODING = "Out.File.Encoding";
         public static string OUT_TABLENAME = "Out.Tablename";
         public static string OUT_START_ID = "Out.Start.Id";
 
@@ -20,5 +22,6 @@
         public const int ID_LENGHT = 9;
         public static string ORACLE = "Oracle";
         public static string POSTGRES = "Postgres";
+        public static int Utf8 = 65001;
     }
 }
