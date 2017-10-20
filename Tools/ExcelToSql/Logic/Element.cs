@@ -1,4 +1,4 @@
-﻿namespace ExcelToSql
+﻿namespace ExcelToSql.Logic
 {
     public class Element
     {

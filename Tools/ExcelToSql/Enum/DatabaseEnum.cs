@@ -1,4 +1,4 @@
-﻿namespace ExcelToSql
+﻿namespace ExcelToSql.Enum
 {
     public class DatabaseEnum
     {

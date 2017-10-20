@@ -1,5 +1,7 @@
 ﻿using System;
 using System.Reflection;
+using ExcelToSql.Constant;
+using ExcelToSql.Logic;
 
 namespace ExcelToSql
 {
@@ -7,7 +9,7 @@ namespace ExcelToSql
     {
         static void Main(string[] args)
         {
-            if (args.Length == 0 || args[0]?.ToUpper() != Constant.GO)
+            if (args.Length == 0 || args[0]?.ToUpper() != Key.GO)
             {
                 Help();
             };

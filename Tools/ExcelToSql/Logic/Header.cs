@@ -1,6 +1,6 @@
 ﻿using System.Collections.Generic;
 
-namespace ExcelToSql
+namespace ExcelToSql.Logic
 {
     public class Header
     {

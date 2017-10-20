@@ -1,4 +1,6 @@
-﻿namespace ExcelToSql
+﻿using ExcelToSql.Enum;
+
+namespace ExcelToSql.Logic
 { 
     public class Field
     {

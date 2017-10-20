@@ -1,6 +1,4 @@
-﻿using System;
-
-namespace ExcelToSql
+﻿namespace ExcelToSql.Logic
 {
     public static class ExtensionMethods
     {

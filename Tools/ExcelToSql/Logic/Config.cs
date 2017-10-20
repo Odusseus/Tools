@@ -1,7 +1,9 @@
 ﻿using System;
 using System.Configuration;
+using ExcelToSql.Constant;
+using ExcelToSql.Enum;
 
-namespace ExcelToSql
+namespace ExcelToSql.Logic
 {
     public sealed class Config
     {
@@ -26,24 +28,24 @@ namespace ExcelToSql
 
         internal Config()
         {
-            string databaseName = ConfigurationManager.AppSettings[Constant.DATABASE_VENDOR];
+            string databaseName = ConfigurationManager.AppSettings[Key.DATABASE_VENDOR];
             this.DatabaseVendor = DatabaseEnum.Vendor.Oracle;
 
-            if(databaseName == Constant.POSTGRES)
+            if(databaseName == Key.POSTGRES)
             {
                 this.DatabaseVendor = DatabaseEnum.Vendor.Postgres;
             }
             
-            this.ExcelFilename = ConfigurationManager.AppSettings[Constant.EXCEL_FILENAME];
-            this.ExcelPath = ConfigurationManager.AppSettings[Constant.EXCEL_PATH];
-            this.ExcelTabular = ConfigurationManager.AppSettings[Constant.EXCEL_TABULAR];
+            this.ExcelFilename = ConfigurationManager.AppSettings[Key.EXCEL_FILENAME];
+            this.ExcelPath = ConfigurationManager.AppSettings[Key.EXCEL_PATH];
+            this.ExcelTabular = ConfigurationManager.AppSettings[Key.EXCEL_TABULAR];
 
-            this.OutCreateFilename = ConfigurationManager.AppSettings[Constant.OUT_CREATE_FILENAME];
-            this.OutInsertFilename = ConfigurationManager.AppSettings[Constant.OUT_INSTERT_FILENAME];
-            this.OutExtraFields = ConfigurationManager.AppSettings[Constant.OUT_EXTRA_FIELDS];
-            this.OutExtraNumberFields = ConfigurationManager.AppSettings[Constant.OUT_EXTRA_NUMBER_FIELDS];
-            this.OutExtraDateFields = ConfigurationManager.AppSettings[Constant.OUT_EXTRA_DATE_FIELDS];
-            string outFileEncoding = ConfigurationManager.AppSettings[Constant.OUT_FILE_ENCODING];
+            this.OutCreateFilename = ConfigurationManager.AppSettings[Key.OUT_CREATE_FILENAME];
+            this.OutInsertFilename = ConfigurationManager.AppSettings[Key.OUT_INSTERT_FILENAME];
+            this.OutExtraFields = ConfigurationManager.AppSettings[Key.OUT_EXTRA_FIELDS];
+            this.OutExtraNumberFields = ConfigurationManager.AppSettings[Key.OUT_EXTRA_NUMBER_FIELDS];
+            this.OutExtraDateFields = ConfigurationManager.AppSettings[Key.OUT_EXTRA_DATE_FIELDS];
+            string outFileEncoding = ConfigurationManager.AppSettings[Key.OUT_FILE_ENCODING];
 
             if (!string.IsNullOrEmpty(outFileEncoding))
             {
@@ -51,14 +53,14 @@ namespace ExcelToSql
             }
             if(this.OutFileEncoding == 0)
             {
-                this.OutFileEncoding = Constant.Utf8;
+                this.OutFileEncoding = Key.Utf8;
             }
 
                         
-            this.OutTablename = ConfigurationManager.AppSettings[Constant.OUT_TABLENAME].ToLower();
-            this.OutPath = ConfigurationManager.AppSettings[Constant.OUT_PATH];
+            this.OutTablename = ConfigurationManager.AppSettings[Key.OUT_TABLENAME].ToLower();
+            this.OutPath = ConfigurationManager.AppSettings[Key.OUT_PATH];
 
-            string outStartId = ConfigurationManager.AppSettings[Constant.OUT_START_ID];
+            string outStartId = ConfigurationManager.AppSettings[Key.OUT_START_ID];
             int.TryParse(outStartId, out this.OutStartId);
         }
 

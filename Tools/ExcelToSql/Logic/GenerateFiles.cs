@@ -5,8 +5,10 @@ using System.Linq;
 using System.Data;
 using System.Collections.Generic;
 using System.Text;
+using ExcelToSql.Enum;
+using ExcelToSql.Constant;
 
-namespace ExcelToSql
+namespace ExcelToSql.Logic
 {
     public class GenerateFiles
     {
@@ -145,8 +147,8 @@ namespace ExcelToSql
             {
                 Row = 0,
                 Column = header.Fields.Count,
-                Text = Constant.ID,
-                Length = Constant.ID_LENGHT,
+                Text = Key.ID,
+                Length = Key.ID_LENGHT,
                 Type = DatabaseEnum.TypeField.Number
             };
 
@@ -300,7 +302,7 @@ namespace ExcelToSql
                 if (config.DatabaseVendor == DatabaseEnum.Vendor.Oracle || config.DatabaseVendor == DatabaseEnum.Vendor.Postgres)
                 {
                  lines.Add("");
-                 lines.Add($"CREATE UNIQUE INDEX {config.OutTablename}_pk_index ON {config.OutTablename} ({Constant.ID.ToLower()});");
+                 lines.Add($"CREATE UNIQUE INDEX {config.OutTablename}_pk_index ON {config.OutTablename} ({Key.ID.ToLower()});");
                 }
             }
 
