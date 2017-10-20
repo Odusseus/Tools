@@ -2,7 +2,7 @@
 
 namespace TryApp.Logic
 {
-    public class Config : IConfig
+    public sealed class Config : IConfig
     {
         string value;
 
