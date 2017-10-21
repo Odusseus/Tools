@@ -5,7 +5,7 @@ using ExcelToSql.Enum;
 
 namespace ExcelToSql.Logic
 {
-    public sealed class Config
+    public sealed class Config : IConfig
     {
         public readonly DatabaseEnum.Vendor DatabaseVendor;
         public readonly string ExcelFilename;
@@ -26,7 +26,7 @@ namespace ExcelToSql.Logic
         private static volatile Config instance;
         private static object syncRoot = new Object();
 
-        internal Config()
+        public Config()
         {
             string databaseName = ConfigurationManager.AppSettings[Key.DATABASE_VENDOR];
             this.DatabaseVendor = DatabaseEnum.Vendor.Oracle;

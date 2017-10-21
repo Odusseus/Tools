@@ -10,7 +10,7 @@ using ExcelToSql.Constant;
 
 namespace ExcelToSql.Logic
 {
-    public class GenerateFiles
+    public class GenerateFiles : IGenerateFiles
     {
         private Config config;
 

@@ -2,6 +2,8 @@
 using System.Reflection;
 using ExcelToSql.Constant;
 using ExcelToSql.Logic;
+using ExcelToSql.Unity;
+using Unity;
 
 namespace ExcelToSql
 {
@@ -9,14 +11,15 @@ namespace ExcelToSql
     {
         static void Main(string[] args)
         {
+            IUnityContainer container = new UnityContainer();
+            ProjectContainer.RegisterElements(container);
+
+            IGenerateFiles generateFiles = container.Resolve<IGenerateFiles>();
+
             if (args.Length == 0 || args[0]?.ToUpper() != Key.GO)
             {
                 Help();
             };
-
-            Config config = Config.Instance;
-
-            GenerateFiles generateFiles = new GenerateFiles(config);
 
             generateFiles.Run();
         }
