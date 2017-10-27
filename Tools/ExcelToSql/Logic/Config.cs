@@ -8,20 +8,32 @@ namespace ExcelToSql.Logic
     public sealed class Config : IConfig
     {
         public readonly DatabaseEnum.Vendor DatabaseVendor;
+        public readonly int OutFileEncoding;
+        public readonly int OutStartId;
         public readonly string ExcelFilename;
         public readonly string ExcelPath;
         public readonly string ExcelTabular;
-
         public readonly string OutCreateFilename;
-        public readonly string OutInsertFilename;
+        public readonly string OutExtraDateFields;
         public readonly string OutExtraFields;
         public readonly string OutExtraNumberFields;
-        public readonly string OutExtraDateFields;
-        public readonly int OutFileEncoding;
-
-        public readonly string OutTablename;
+        public readonly string OutInsertFilename;
         public readonly string OutPath;
-        public readonly int OutStartId;
+        public readonly string OutTablename;
+
+        DatabaseEnum.Vendor IConfig.DatabaseVendor { get { return this.DatabaseVendor; } }
+        int IConfig.OutFileEncoding { get { return this.OutFileEncoding; } }
+        int IConfig.OutStartId { get { return this.OutStartId; } }
+        string IConfig.ExcelFilename { get { return this.ExcelFilename; } }
+        string IConfig.ExcelPath { get { return this.ExcelPath; } }
+        string IConfig.ExcelTabular { get { return this.ExcelTabular; } }
+        string IConfig.OutCreateFilename { get { return this.OutCreateFilename; } }
+        string IConfig.OutExtraDateFields { get { return this.OutExtraDateFields; } }
+        string IConfig.OutExtraFields { get { return this.OutExtraFields; } }
+        string IConfig.OutExtraNumberFields { get { return this.OutExtraNumberFields; } }
+        string IConfig.OutInsertFilename { get { return this.OutInsertFilename; } }
+        string IConfig.OutPath { get { return this.OutPath; } }
+        string IConfig.OutTablename { get { return this.OutTablename; } }
 
         private static volatile Config instance;
         private static object syncRoot = new Object();
@@ -49,7 +61,7 @@ namespace ExcelToSql.Logic
 
             if (!string.IsNullOrEmpty(outFileEncoding))
             {
-                int.TryParse(outFileEncoding, out this.OutStartId);
+                int.TryParse(outFileEncoding, out this.OutFileEncoding);
             }
             if(this.OutFileEncoding == 0)
             {

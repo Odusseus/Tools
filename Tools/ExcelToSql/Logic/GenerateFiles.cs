@@ -12,9 +12,9 @@ namespace ExcelToSql.Logic
 {
     public class GenerateFiles : IGenerateFiles
     {
-        private Config config;
+        private IConfig config;
 
-        public GenerateFiles(Config config)
+        public GenerateFiles(IConfig config)
         {
             this.config = config;
         }

@@ -9,7 +9,6 @@ namespace ExcelToSql.Unity
         {
             container.RegisterType<IConfig, Config>();
             container.RegisterType<IGenerateFiles, GenerateFiles>();
-
         }
     }
 }
