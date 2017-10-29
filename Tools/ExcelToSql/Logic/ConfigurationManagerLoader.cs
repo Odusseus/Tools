@@ -1,8 +1,10 @@
 ﻿using System.Configuration;
+using System.Diagnostics.CodeAnalysis;
 using ExcelToSql.Constant;
 
 namespace ExcelToSql.Logic
 {
+    [ExcludeFromCodeCoverage]
     public class ConfigurationManagerLoader : IConfigurationManagerLoader
     {
         public string KeyDatabaseVendor
