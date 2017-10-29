@@ -60,5 +60,27 @@ namespace ExcelToSql.Logic.Tests
             result.Should().Be(20);
 
         }
+        
+        #region Clean
+        [TestMethod()]
+        [DataRow("abc", "abc")]
+        [DataRow("ABC", "abc")]
+        [DataRow("   ABC", "abc")]
+        [DataRow("ABC   ", "abc")]
+        [DataRow("   ABC   ", "abc")]
+        [DataRow("A B C", "a_b_c")]
+        [DataRow("äûç", "auc")]
+
+        public void CleanTest(string text, string assertText)
+        {
+            // Arrange
+            
+            // Act
+            string result = text.Clean();
+
+            // Assert
+            result.Should().Be(assertText);
+        }
+        #endregion Clean
     }
 }

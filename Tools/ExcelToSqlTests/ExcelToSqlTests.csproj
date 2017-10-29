@@ -82,6 +82,7 @@
     <Compile Include="ExcelToSqlTests.cs" />
     <Compile Include="Logic\ConfigTests.cs" />
     <Compile Include="Logic\ExtensionMethodsTests.cs" />
+    <Compile Include="Logic\FieldTests.cs" />
     <Compile Include="Logic\HelpTests.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>

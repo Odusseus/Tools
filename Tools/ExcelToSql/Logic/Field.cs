@@ -5,6 +5,7 @@ namespace ExcelToSql.Logic
     public class Field
     {
         private string text;
+        private string name;
 
         public int Row { get; set; }
         public int Column { get; set; }
@@ -18,10 +19,10 @@ namespace ExcelToSql.Logic
             set
             {
                 this.text = value.ToString();
-                this.Name = value.Trim().ToLower().Replace(" ", "_").Replace("'", "_");
+                this.name = value.Trim().ToLower().Replace(" ", "_").Replace("'", "_");
             }
         }
-        public string Name { get; set; }
+        public string Name { get { return name; } }
 
         public int Length { get; set; }
 
