@@ -1,5 +1,4 @@
-﻿using System;
-using System.Reflection;
+﻿using System.Diagnostics.CodeAnalysis;
 using ExcelToSql.Constant;
 using ExcelToSql.Logic;
 using ExcelToSql.Unity;
@@ -7,42 +6,36 @@ using Unity;
 
 namespace ExcelToSql
 {
+    /// <summary>
+    /// The excel to sql class.
+    /// </summary>
     public class ExcelToSql
     {
-        static void Main(string[] args)
+        /// <summary>
+        /// The main entry point.
+        /// </summary>
+        /// <param name="args">The arguments.</param>
+        [ExcludeFromCodeCoverage]
+        public static void Main(string[] args)
         {
             IUnityContainer container = new UnityContainer();
             ProjectContainer.RegisterElements(container);
 
-            IGenerateFiles generateFiles = container.Resolve<IGenerateFiles>();
-
-            if (args.Length == 0 || args[0]?.ToUpper() != Key.GO)
+            if (GetHelp(args))
             {
-                Help();
-            };
-
-            generateFiles.Run();
+                IHelp help = container.Resolve<IHelp>();
+                help.Write();
+            }
+            else
+            {
+                IGenerateFiles generateFiles = container.Resolve<IGenerateFiles>();
+                generateFiles.Run();
+            }
         }
 
-        static void Help()
+        internal static bool GetHelp(string[] args)
         {
-            var version = Assembly.GetEntryAssembly().GetName().Version;
-            Console.WriteLine($"ExcelToSql version {version}, 15-10-2017, author Odusseus, https://github.com/Odusseus ");
-            Console.WriteLine("ExcelToSql read a Excel spreadsheet and generate basic create and insert sql-scripts.");
-            Console.WriteLine("ExcelToSql go          execute the program");
-            Console.WriteLine("ExcelToSql             call the help");
-            Console.WriteLine("Configuration are in the ExcelToSql.Exe.Config file.");
-            Console.WriteLine("- Database.Vendor :     Oracle or Postgres");
-            Console.WriteLine("- Excel.Filename  :     Excel filename");
-            Console.WriteLine("- Excel.Path :          path to the Excel file");
-            Console.WriteLine("- Excel.Tabular :       Name from the tabular");
-            Console.WriteLine("- Out.Create.Filename : Output create filename");
-            Console.WriteLine("- Out.Insert.Filename : Output insert filename");
-            Console.WriteLine("- Out.Path :            Output path");
-            Console.WriteLine("- Out.Tablename :       Name from te table");
-            Console.WriteLine("- Out.Extra.Fields :    List of extra field to create. The fields are comma separated with optional field length (fielname=fieldlegth).");
-            Console.WriteLine("- Exemple :             State,Message=2000");
-            Environment.Exit(-1);
+            return args.Length == 0 || args[0]?.ToUpper() != Key.GO;
         }
     }
 }

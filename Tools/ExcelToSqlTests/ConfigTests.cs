@@ -1,16 +1,9 @@
-﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
-using ExcelToSql;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using FluentAssertions;
-using Moq;
-using Castle.Core.Configuration;
+﻿using System.Diagnostics.CodeAnalysis;
+using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 namespace ExcelToSql.Tests
 {
+    [ExcludeFromCodeCoverage]
     [TestClass()]
     public class ConfigTests
     {

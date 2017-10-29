@@ -60,20 +60,30 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Logic\AssemblyLoader.cs" />
     <Compile Include="Logic\Config.cs" />
     <Compile Include="Constant\Key.cs" />
     <Compile Include="Enum\DatabaseEnum.cs" />
     <Compile Include="Logic\Element.cs" />
     <Compile Include="ExcelToSql.cs" />
+    <Compile Include="Logic\App.cs" />
     <Compile Include="Logic\Field.cs" />
     <Compile Include="GlobalSuppressions.cs" />
     <Compile Include="Logic\Header.cs" />
+    <Compile Include="Logic\Help.cs" />
+    <Compile Include="Logic\IApp.cs" />
+    <Compile Include="Logic\IAssemblyLoader.cs" />
     <Compile Include="Logic\IConfig.cs" />
+    <Compile Include="Logic\IConfigurationManagerLoader.cs" />
     <Compile Include="Logic\IGenerateFiles.cs" />
+    <Compile Include="Logic\IHelp.cs" />
+    <Compile Include="Logic\IOutputWriter.cs" />
+    <Compile Include="Logic\OutputWriter.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Logic\GenerateFiles.cs" />
     <Compile Include="Logic\Row.cs" />
     <Compile Include="Logic\ExtensionMethods.cs" />
+    <Compile Include="Logic\ConfigurationManagerLoader.cs" />
     <Compile Include="Unity\ProjectContainer.cs" />
   </ItemGroup>
   <ItemGroup>

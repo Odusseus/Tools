@@ -19,4 +19,5 @@
 [assembly: System.Diagnostics.CodeAnalysis.SuppressMessage("Documentation", "MR3001:Public properties must have a xml documentation header.", Justification = "<Pending>", Scope = "member", Target = "~P:ExcelToSql.Element.Name")]
 [assembly: System.Diagnostics.CodeAnalysis.SuppressMessage("Documentation", "MR3001:Public properties must have a xml documentation header.", Justification = "<Pending>", Scope = "member", Target = "~P:ExcelToSql.Config.Instance")]
 [assembly: System.Diagnostics.CodeAnalysis.SuppressMessage("Documentation", "MR0001:Public classes must have a xml documentation header.", Justification = "<Pending>", Scope = "type", Target = "~T:ExcelToSql.Config")]
+[assembly: System.Diagnostics.CodeAnalysis.SuppressMessage("Documentation", "MR0001:Public classes must have a xml documentation header.", Justification = "<Pending>", Scope = "type", Target = "~T:ExcelToSql.Logic.ConfigurationManagerLoader")]
 
