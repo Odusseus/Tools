@@ -32,9 +32,8 @@ namespace ExcelToSql.Logic.Tests
             help.Write();
 
             // Assert
-            mockApp.Verify(m => m.Exit(-1),Times.Once());
+            mockApp.Verify(m => m.Exit(-1), Times.Once());
             mockOutputWriter.Verify(m => m.WriteLine(It.IsAny<string>()), Times.AtLeastOnce);
-            
         }
     }
 }

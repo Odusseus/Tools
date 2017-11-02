@@ -1,16 +1,13 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using System.Diagnostics.CodeAnalysis;
 using ExcelToSql.Enum;
 using ExcelToSql.Logic;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
 using FluentAssertions;
+using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 namespace ExcelToSqlTests.Logic
 {
     [TestClass]
+    [ExcludeFromCodeCoverage]
     public class FieldTests
     {
         [TestMethod]

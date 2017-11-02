@@ -9,6 +9,7 @@ namespace ExcelToSql.Tests
     public class ExcelToSqlTests
     {
         #region GetHelp
+
         [TestMethod()]
         public void GetHelp_Without_Arguments_Should_Retrun_True()
         {
@@ -53,6 +54,7 @@ namespace ExcelToSql.Tests
 
             result.Should().BeTrue();
         }
+
         #endregion GetHelp
     }
 }

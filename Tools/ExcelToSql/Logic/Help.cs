@@ -1,12 +1,10 @@
-﻿using System.Reflection;
-
-namespace ExcelToSql.Logic
+﻿namespace ExcelToSql.Logic
 {
     public class Help : IHelp
     {
-        readonly IApp app;
-        readonly IAssemblyLoader assemblyLoader;
-        readonly IOutputWriter outputWriter;
+        private readonly IApp app;
+        private readonly IAssemblyLoader assemblyLoader;
+        private readonly IOutputWriter outputWriter;
 
         public Help(IAssemblyLoader assemblyLoader, IApp app, IOutputWriter outputWriter)
         {

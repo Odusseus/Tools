@@ -1,12 +1,12 @@
 ﻿using System;
-using System.IO;
-using ExcelDataReader;
-using System.Linq;
-using System.Data;
 using System.Collections.Generic;
+using System.Data;
+using System.IO;
+using System.Linq;
 using System.Text;
-using ExcelToSql.Enum;
+using ExcelDataReader;
 using ExcelToSql.Constant;
+using ExcelToSql.Enum;
 
 namespace ExcelToSql.Logic
 {
@@ -33,6 +33,7 @@ namespace ExcelToSql.Logic
             int inserts = InsertSqlScript(header, tabular);
             Console.WriteLine($"Insert {inserts} rows in file {config.OutInsertFilename} is ready.");
         }
+
         internal DataTable GetTabular()
         {
             DataTable tabular;
@@ -40,7 +41,6 @@ namespace ExcelToSql.Logic
             string filename = $"{this.config.ExcelPath}\\{this.config.ExcelFilename}";
             using (var stream = File.Open(filename, FileMode.Open, FileAccess.Read))
             {
-
                 // Auto-detect format, supports:
                 //  - Binary Excel files (2.0-2003 format; *.xls)
                 //  - OpenXml Excel files (2007 format; *.xlsx)
@@ -48,23 +48,21 @@ namespace ExcelToSql.Logic
                 {
                     var dataset = reader.AsDataSet(new ExcelDataSetConfiguration()
                     {
-
-                        // Gets or sets a value indicating whether to set the DataColumn.DataType 
+                        // Gets or sets a value indicating whether to set the DataColumn.DataType
                         // property in a second pass.
                         UseColumnDataType = true,
 
-                        // Gets or sets a callback to obtain configuration options for a DataTable. 
+                        // Gets or sets a callback to obtain configuration options for a DataTable.
                         ConfigureDataTable = (tableReader) => new ExcelDataTableConfiguration()
                         {
-
                             // Gets or sets a value indicating the prefix of generated column names.
                             EmptyColumnNamePrefix = "Column",
 
-                            // Gets or sets a value indicating whether to use a row from the 
+                            // Gets or sets a value indicating whether to use a row from the
                             // data as column names.
                             UseHeaderRow = false,
 
-                            // Gets or sets a callback to determine which row is the header row. 
+                            // Gets or sets a callback to determine which row is the header row.
                             // Only called when UseHeaderRow = true.
                             ReadHeaderRow = (rowReader) =>
                             {
@@ -72,7 +70,7 @@ namespace ExcelToSql.Logic
                                 rowReader.Read();
                             },
 
-                            // Gets or sets a callback to determine whether to include the 
+                            // Gets or sets a callback to determine whether to include the
                             // current row in the DataTable.
                             FilterRow = (rowReader) =>
                             {
@@ -87,6 +85,7 @@ namespace ExcelToSql.Logic
 
             return tabular;
         }
+
         internal Header GetHeader(DataTable tabular)
         {
             Header header = new Header();
@@ -112,6 +111,7 @@ namespace ExcelToSql.Logic
             AddExtraDateFields(header);
             return header;
         }
+
         internal void SetFieldLength(DataTable tabular, Header header)
         {
             foreach (Field field in header.Fields)
@@ -141,6 +141,7 @@ namespace ExcelToSql.Logic
                 }
             }
         }
+
         internal void AddIdField(Header header)
         {
             Field fieldId = new Field
@@ -154,6 +155,7 @@ namespace ExcelToSql.Logic
 
             header.Fields.Add(fieldId);
         }
+
         internal void AddExtraFields(Header header)
         {
             if (!string.IsNullOrEmpty(config.OutExtraFields))
@@ -186,6 +188,7 @@ namespace ExcelToSql.Logic
                 }
             }
         }
+
         internal void AddExtraNumberFields(Header header)
         {
             if (!string.IsNullOrEmpty(config.OutExtraNumberFields))
@@ -286,7 +289,7 @@ namespace ExcelToSql.Logic
                 }
                 else if (field.Type == DatabaseEnum.TypeField.Text)
                 {
-                    if(config.DatabaseVendor == DatabaseEnum.Vendor.Oracle)
+                    if (config.DatabaseVendor == DatabaseEnum.Vendor.Oracle)
                     {
                         lines.Add($"{field.Name} VARCHAR2({field.Length}){endField}");
                     }
@@ -301,14 +304,14 @@ namespace ExcelToSql.Logic
             {
                 if (config.DatabaseVendor == DatabaseEnum.Vendor.Oracle || config.DatabaseVendor == DatabaseEnum.Vendor.Postgres)
                 {
-                 lines.Add("");
-                 lines.Add($"CREATE UNIQUE INDEX {config.OutTablename}_pk_index ON {config.OutTablename} ({Key.ID.ToLower()});");
+                    lines.Add("");
+                    lines.Add($"CREATE UNIQUE INDEX {config.OutTablename}_pk_index ON {config.OutTablename} ({Key.ID.ToLower()});");
                 }
             }
 
             File.WriteAllLines($"{config.OutPath}\\{config.OutCreateFilename}", lines, Encoding.GetEncoding(config.OutFileEncoding));
-
         }
+
         internal int InsertSqlScript(Header header, DataTable tabular)
         {
             string insertFieldNames = string.Empty;
@@ -361,7 +364,7 @@ namespace ExcelToSql.Logic
                         }
                         else
                         {
-                         value = $"'{field.ToString().Replace("'","''").Trim()}'";
+                            value = $"'{field.ToString().Replace("'", "''").Trim()}'";
                         }
 
                         value += ", ";
@@ -381,7 +384,7 @@ namespace ExcelToSql.Logic
                     inserts.Add(insert);
                 }
             }
-            if(config.DatabaseVendor == DatabaseEnum.Vendor.Oracle)
+            if (config.DatabaseVendor == DatabaseEnum.Vendor.Oracle)
             {
                 inserts.Add("");
                 inserts.Add("COMMIT;");

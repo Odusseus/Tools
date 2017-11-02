@@ -1,7 +1,7 @@
 ﻿using ExcelToSql.Enum;
 
 namespace ExcelToSql.Logic
-{ 
+{
     public class Field
     {
         private string text;
@@ -9,6 +9,7 @@ namespace ExcelToSql.Logic
 
         public int Row { get; set; }
         public int Column { get; set; }
+
         public string Text
         {
             get
@@ -19,9 +20,10 @@ namespace ExcelToSql.Logic
             set
             {
                 this.text = value.ToString();
-                this.name = value.Trim().ToLower().Replace(" ", "_").Replace("'", "_");
+                this.name = value.Clean();
             }
         }
+
         public string Name { get { return name; } }
 
         public int Length { get; set; }

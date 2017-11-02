@@ -1,5 +1,4 @@
-﻿using System.Collections.Generic;
-using System.Globalization;
+﻿using System.Globalization;
 using System.Text;
 
 namespace ExcelToSql.Logic
@@ -42,7 +41,7 @@ namespace ExcelToSql.Logic
         }
 
         // https://stackoverflow.com/questions/249087/how-do-i-remove-diacritics-accents-from-a-string-in-net
-        static string RemoveDiacritics(this string text)
+        internal static string RemoveDiacritics(this string text)
         {
             var normalizedString = text.Normalize(NormalizationForm.FormD);
             var stringBuilder = new StringBuilder();
