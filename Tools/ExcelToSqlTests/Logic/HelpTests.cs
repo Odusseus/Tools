@@ -16,9 +16,6 @@ namespace ExcelToSql.Logic.Tests
             // Arrange
             var fixture = new Fixture();
 
-            Mock<IApp> mockApp = new Mock<IApp>();
-            IApp app = mockApp.Object;
-
             Mock<IAssemblyLoader> mockAssemblyLoader = new Mock<IAssemblyLoader>();
             mockAssemblyLoader.Setup(m => m.GetEntryAssembly()).Returns(Assembly.LoadFrom("ExcelToSqlTests.dll"));
             IAssemblyLoader assemblyLoader = mockAssemblyLoader.Object;
@@ -26,13 +23,12 @@ namespace ExcelToSql.Logic.Tests
             Mock<IOutputWriter> mockOutputWriter = new Mock<IOutputWriter>();
             IOutputWriter outputWriter = mockOutputWriter.Object;
 
-            Help help = new Help(assemblyLoader, app, outputWriter);
+            Help help = new Help(assemblyLoader, outputWriter);
 
             // Act
             help.Write();
 
             // Assert
-            mockApp.Verify(m => m.Exit(-1), Times.Once());
             mockOutputWriter.Verify(m => m.WriteLine(It.IsAny<string>()), Times.AtLeastOnce);
         }
     }

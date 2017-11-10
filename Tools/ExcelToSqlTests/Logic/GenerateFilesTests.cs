@@ -1,4 +1,5 @@
 ﻿using System.Data;
+using System.Diagnostics.CodeAnalysis;
 using FluentAssertions;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Moq;
@@ -7,6 +8,7 @@ using Newtonsoft.Json;
 namespace ExcelToSql.Logic.Tests
 {
     [TestClass()]
+    [ExcludeFromCodeCoverage]
     public class GenerateFilesTests
     {
         [TestMethod()]

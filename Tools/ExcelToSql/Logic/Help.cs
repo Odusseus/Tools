@@ -2,14 +2,12 @@
 {
     public class Help : IHelp
     {
-        private readonly IApp app;
         private readonly IAssemblyLoader assemblyLoader;
         private readonly IOutputWriter outputWriter;
 
-        public Help(IAssemblyLoader assemblyLoader, IApp app, IOutputWriter outputWriter)
+        public Help(IAssemblyLoader assemblyLoader, IOutputWriter outputWriter)
         {
             this.assemblyLoader = assemblyLoader;
-            this.app = app;
             this.outputWriter = outputWriter;
         }
 
@@ -31,7 +29,6 @@
             this.outputWriter.WriteLine("- Out.Tablename :       Name from te table");
             this.outputWriter.WriteLine("- Out.Extra.Fields :    List of extra field to create. The fields are comma separated with optional field length (fielname=fieldlegth).");
             this.outputWriter.WriteLine("- Exemple :             State,Message=2000");
-            this.app.Exit(-1);
         }
     }
 }

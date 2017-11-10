@@ -87,13 +87,11 @@
     <Compile Include="Enum\DatabaseEnum.cs" />
     <Compile Include="Logic\Element.cs" />
     <Compile Include="ExcelToSql.cs" />
-    <Compile Include="Logic\App.cs" />
     <Compile Include="Logic\Field.cs" />
     <Compile Include="GlobalSuppressions.cs" />
     <Compile Include="Logic\FileSystem.cs" />
     <Compile Include="Logic\Header.cs" />
     <Compile Include="Logic\Help.cs" />
-    <Compile Include="Logic\IApp.cs" />
     <Compile Include="Logic\IAssemblyLoader.cs" />
     <Compile Include="Logic\IConfig.cs" />
     <Compile Include="Logic\IConfigurationManagerLoader.cs" />

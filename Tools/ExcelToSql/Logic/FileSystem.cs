@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
 using System.IO;
 using System.Text;
 
@@ -7,6 +8,7 @@ namespace ExcelToSql.Logic
     /// <summary>
     /// The file system class.
     /// </summary>
+    [ExcludeFromCodeCoverage]
     public class FileSystem : IFileSystem
     {
         /// <summary>

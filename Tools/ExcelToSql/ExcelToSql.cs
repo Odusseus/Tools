@@ -25,6 +25,7 @@ namespace ExcelToSql
             {
                 IHelp help = container.Resolve<IHelp>();
                 help.Write();
+                System.Environment.Exit(-1);
             }
             else
             {

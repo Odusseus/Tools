@@ -9,7 +9,6 @@ namespace ExcelToSql.Unity
     {
         public static void RegisterElements(IUnityContainer container)
         {
-            container.RegisterType<IApp, App>();
             container.RegisterType<IAssemblyLoader, AssemblyLoader>();
             container.RegisterType<IConfig, Config>();
             container.RegisterType<IConfigurationManagerLoader, ConfigurationManagerLoader>();
