@@ -1,10 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Data;
-using System.IO;
 using System.Linq;
 using System.Text;
-using ExcelDataReader;
 using ExcelToSql.Constant;
 using ExcelToSql.Enum;
 
@@ -12,18 +10,21 @@ namespace ExcelToSql.Logic
 {
     public class GenerateFiles : IGenerateFiles
     {
-        private IConfig config;
-        private IFileSystem fileSystem;
+        private readonly IConfig config;
+        private readonly ISpreadsheet spreadsheet;
+        private readonly IFileSystem fileSystem;
 
-        public GenerateFiles(IConfig config, IFileSystem fileSystem)
+        public GenerateFiles(IConfig config, ISpreadsheet spreadsheet, IFileSystem fileSystem)
         {
             this.config = config;
+            this.spreadsheet = spreadsheet;
             this.fileSystem = fileSystem;
         }
 
         public bool Run()
         {
-            DataTable tabular = GetTabular();
+            DataTable tabular = spreadsheet.GetTabular();
+
             Console.WriteLine($"Tabular {config.ExcelTabular} is read.");
 
             Header header = GetHeader(tabular);
@@ -36,59 +37,6 @@ namespace ExcelToSql.Logic
             Console.WriteLine($"Insert {inserts} rows in file {config.OutInsertFilename} is ready.");
 
             return true;
-        }
-
-        internal DataTable GetTabular()
-        {
-            DataTable tabular;
-
-            string filename = $"{this.config.ExcelPath}\\{this.config.ExcelFilename}";
-            //using (var stream = File.Open(filename, FileMode.Open, FileAccess.Read))
-            using (var stream = this.fileSystem.OpenRead(filename))
-            {
-                // Auto-detect format, supports:
-                //  - Binary Excel files (2.0-2003 format; *.xls)
-                //  - OpenXml Excel files (2007 format; *.xlsx)
-                using (var reader = ExcelReaderFactory.CreateReader(stream))
-                {
-                    var dataset = reader.AsDataSet(new ExcelDataSetConfiguration()
-                    {
-                        // Gets or sets a value indicating whether to set the DataColumn.DataType
-                        // property in a second pass.
-                        UseColumnDataType = true,
-
-                        // Gets or sets a callback to obtain configuration options for a DataTable.
-                        ConfigureDataTable = (tableReader) => new ExcelDataTableConfiguration()
-                        {
-                            // Gets or sets a value indicating the prefix of generated column names.
-                            EmptyColumnNamePrefix = "Column",
-
-                            // Gets or sets a value indicating whether to use a row from the
-                            // data as column names.
-                            UseHeaderRow = false,
-
-                            // Gets or sets a callback to determine which row is the header row.
-                            // Only called when UseHeaderRow = true.
-                            ReadHeaderRow = (rowReader) =>
-                            {
-                                // F.ex skip the first row and use the 2nd row as column headers:
-                                rowReader.Read();
-                            },
-
-                            // Gets or sets a callback to determine whether to include the
-                            // current row in the DataTable.
-                            FilterRow = (rowReader) =>
-                            {
-                                return true;
-                            },
-                        }
-                    });
-
-                    tabular = dataset.Tables.Cast<DataTable>().FirstOrDefault(d => d.TableName == config.ExcelTabular);
-                }
-            }
-
-            return tabular;
         }
 
         internal Header GetHeader(DataTable tabular)
@@ -314,7 +262,7 @@ namespace ExcelToSql.Logic
                 }
             }
 
-            File.WriteAllLines($"{config.OutPath}\\{config.OutCreateFilename}", lines, Encoding.GetEncoding(config.OutFileEncoding));
+            this.fileSystem.WriteAllLines($"{config.OutPath}\\{config.OutCreateFilename}", lines, Encoding.GetEncoding(config.OutFileEncoding));
         }
 
         internal int InsertSqlScript(Header header, DataTable tabular)
@@ -395,7 +343,7 @@ namespace ExcelToSql.Logic
                 inserts.Add("COMMIT;");
             }
 
-            File.WriteAllLines($"{config.OutPath}\\{config.OutInsertFilename}", inserts, Encoding.GetEncoding(config.OutFileEncoding));
+            this.fileSystem.WriteAllLines($"{config.OutPath}\\{config.OutInsertFilename}", inserts, Encoding.GetEncoding(config.OutFileEncoding));
 
             return id;
         }

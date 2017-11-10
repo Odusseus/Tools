@@ -17,6 +17,7 @@ namespace ExcelToSql.Unity
             container.RegisterType<IGenerateFiles, GenerateFiles>();
             container.RegisterType<IHelp, Help>();
             container.RegisterType<IOutputWriter, OutputWriter>();
+            container.RegisterType<ISpreadsheet, Spreadsheet>();
         }
     }
 }

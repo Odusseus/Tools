@@ -1,4 +1,6 @@
-﻿using System.IO;
+﻿using System.Collections.Generic;
+using System.IO;
+using System.Text;
 
 namespace ExcelToSql.Logic
 {
@@ -15,6 +17,11 @@ namespace ExcelToSql.Logic
         public FileStream OpenRead(string path)
         {
             return System.IO.File.OpenRead(path);
+        }
+
+        public void WriteAllLines(string path, List<string> contents, Encoding encoding)
+        {
+            System.IO.File.WriteAllLines(path, contents, encoding);
         }
     }
 }
