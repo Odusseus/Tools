@@ -13,13 +13,15 @@ namespace ExcelToSql.Logic
     public class GenerateFiles : IGenerateFiles
     {
         private IConfig config;
+        private IFileSystem fileSystem;
 
-        public GenerateFiles(IConfig config)
+        public GenerateFiles(IConfig config, IFileSystem fileSystem)
         {
             this.config = config;
+            this.fileSystem = fileSystem;
         }
 
-        public void Run()
+        public bool Run()
         {
             DataTable tabular = GetTabular();
             Console.WriteLine($"Tabular {config.ExcelTabular} is read.");
@@ -32,6 +34,8 @@ namespace ExcelToSql.Logic
 
             int inserts = InsertSqlScript(header, tabular);
             Console.WriteLine($"Insert {inserts} rows in file {config.OutInsertFilename} is ready.");
+
+            return true;
         }
 
         internal DataTable GetTabular()
@@ -39,7 +43,8 @@ namespace ExcelToSql.Logic
             DataTable tabular;
 
             string filename = $"{this.config.ExcelPath}\\{this.config.ExcelFilename}";
-            using (var stream = File.Open(filename, FileMode.Open, FileAccess.Read))
+            //using (var stream = File.Open(filename, FileMode.Open, FileAccess.Read))
+            using (var stream = this.fileSystem.OpenRead(filename))
             {
                 // Auto-detect format, supports:
                 //  - Binary Excel files (2.0-2003 format; *.xls)

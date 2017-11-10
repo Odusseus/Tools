@@ -2,6 +2,6 @@
 {
     public interface IGenerateFiles
     {
-        void Run();
+        bool Run();
     }
 }

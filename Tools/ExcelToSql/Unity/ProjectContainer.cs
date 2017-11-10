@@ -13,6 +13,7 @@ namespace ExcelToSql.Unity
             container.RegisterType<IAssemblyLoader, AssemblyLoader>();
             container.RegisterType<IConfig, Config>();
             container.RegisterType<IConfigurationManagerLoader, ConfigurationManagerLoader>();
+            container.RegisterType<IFileSystem, FileSystem>();
             container.RegisterType<IGenerateFiles, GenerateFiles>();
             container.RegisterType<IHelp, Help>();
             container.RegisterType<IOutputWriter, OutputWriter>();

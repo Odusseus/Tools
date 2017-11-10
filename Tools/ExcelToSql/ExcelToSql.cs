@@ -29,7 +29,17 @@ namespace ExcelToSql
             else
             {
                 IGenerateFiles generateFiles = container.Resolve<IGenerateFiles>();
-                generateFiles.Run();
+                bool isRun = generateFiles.Run();
+
+                if (isRun)
+                {
+                    System.Environment.Exit(0);
+                }
+                else
+                {
+                    System.Environment.Exit(-1);
+                }
+
             }
         }
 
