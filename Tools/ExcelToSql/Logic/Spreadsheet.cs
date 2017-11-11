@@ -1,9 +1,11 @@
 ﻿using System.Data;
+using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using ExcelDataReader;
 
 namespace ExcelToSql.Logic
 {
+    [ExcludeFromCodeCoverage]
     public class Spreadsheet : ISpreadsheet
     {
         private IConfig config;

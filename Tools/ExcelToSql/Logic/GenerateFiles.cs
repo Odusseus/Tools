@@ -43,6 +43,11 @@ namespace ExcelToSql.Logic
         {
             Header header = new Header();
             int columnId = 0;
+            if(tabular.Rows.Count == 0)
+            {
+                return header;
+            }
+
             foreach (var item in tabular.Rows[0].ItemArray)
             {
                 Field field = new Field
