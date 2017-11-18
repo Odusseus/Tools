@@ -72,6 +72,11 @@ namespace ExcelToSql.Logic
 
         internal void SetFieldLength(DataTable tabular, Header header)
         {
+            if(tabular == null || header == null)
+            {
+                return;
+            }
+
             foreach (Field field in header.Fields)
             {
                 foreach (DataRow row in tabular.Rows)
@@ -86,10 +91,7 @@ namespace ExcelToSql.Logic
                     }
                     else
                     {
-                        string text = row.ItemArray[field.Column].ToString();
-                        int singlecotes = text.Count(x => x == '\'');
-
-                        length = (row.ItemArray[field.Column].ToString().Trim().Length + singlecotes).RoundUp();
+                        length = (row.ItemArray[field.Column].ToString().Length).RoundUp();
                     }
 
                     if (field.Length < length)
@@ -345,7 +347,7 @@ namespace ExcelToSql.Logic
             if (config.DatabaseVendor == DatabaseEnum.Vendor.Oracle)
             {
                 inserts.Add("");
-                inserts.Add("COMMIT;");
+                inserts.Add($"{Constant.Key.COMMIT};");
             }
 
             this.fileSystem.WriteAllLines($"{config.OutPath}\\{config.OutInsertFilename}", inserts, Encoding.GetEncoding(config.OutFileEncoding));

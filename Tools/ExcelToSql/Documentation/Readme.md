@@ -17,3 +17,7 @@ https://blogs.msdn.microsoft.com/devops/2016/06/17/taking-the-mstest-framework-f
 
 How do I remove diacritics (accents) from a string in .NET?
 https://stackoverflow.com/questions/249087/how-do-i-remove-diacritics-accents-from-a-string-in-net
+
+Create DataTable 
+https://code.msdn.microsoft.com/windowsdesktop/How-to-create-DataTable-25f6c390
+https://social.msdn.microsoft.com/Forums/vstudio/en-US/6ffcb247-77fb-40b4-bcba-08ba377ab9db/converting-a-list-to-datatable?forum=csharpgeneral
