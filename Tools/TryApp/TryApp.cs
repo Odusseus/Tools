@@ -16,9 +16,6 @@ namespace TryApp
             ContainerMagic.RegisterElements(container);
 
             IRun run = container.Resolve<IRun>();
-            bool go1 = run.Go("123");
-            bool go2 = run.Go("");
-
         }
     }
 }

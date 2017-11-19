@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Data;
-using System.Linq;
 using System.Text;
 using ExcelToSql.Constant;
 using ExcelToSql.Enum;
@@ -13,37 +12,54 @@ namespace ExcelToSql.Logic
         private readonly IConfig config;
         private readonly ISpreadsheet spreadsheet;
         private readonly IFileSystem fileSystem;
+        private readonly IOutputWriter outputWriter;
 
-        public GenerateFiles(IConfig config, ISpreadsheet spreadsheet, IFileSystem fileSystem)
+        public GenerateFiles(IConfig config, ISpreadsheet spreadsheet, IFileSystem fileSystem, IOutputWriter outputWriter)
         {
             this.config = config;
             this.spreadsheet = spreadsheet;
             this.fileSystem = fileSystem;
+            this.outputWriter = outputWriter;
         }
 
         public bool Run()
         {
+            bool returnBool = true;
+
             DataTable tabular = spreadsheet.GetTabular();
 
-            Console.WriteLine($"Tabular {config.ExcelTabular} is read.");
+            this.outputWriter.WriteLine($"Tabular {config.ExcelTabular} is read.");
 
             Header header = GetHeader(tabular);
-            Console.WriteLine($"Header is read.");
 
-            CreateSqlScript(header);
-            Console.WriteLine($"Create file {config.OutCreateFilename} is ready.");
+            if (header == null || header.Fields == null)
+            {
+                this.outputWriter.WriteLine($"Header is empty.");
+                return false;
+            }
+            this.outputWriter.WriteLine($"Header is read.");
 
-            int inserts = InsertSqlScript(header, tabular);
-            Console.WriteLine($"Insert {inserts} rows in file {config.OutInsertFilename} is ready.");
+            returnBool = this.CreateSqlScript(header);
 
-            return true;
+            this.outputWriter.WriteLine($"Create file {config.OutCreateFilename} is ready.");
+
+            int inserts = this.InsertSqlScript(header, tabular);
+            this.outputWriter.WriteLine($"Insert {inserts} rows in file {config.OutInsertFilename} is ready.");
+
+            return returnBool;
         }
+
+        
 
         internal Header GetHeader(DataTable tabular)
         {
+            if (tabular == null)
+            {
+                return null;
+            }
             Header header = new Header();
             int columnId = 0;
-            if(tabular.Rows.Count == 0)
+            if (tabular.Rows.Count == 0)
             {
                 return header;
             }
@@ -72,7 +88,7 @@ namespace ExcelToSql.Logic
 
         internal void SetFieldLength(DataTable tabular, Header header)
         {
-            if(tabular == null || header == null)
+            if (tabular == null || header == null)
             {
                 return;
             }
@@ -84,7 +100,7 @@ namespace ExcelToSql.Logic
                     int length = 0;
 
                     object box = (object)row.ItemArray[field.Column];
-                    if (box.GetType() == typeof(DateTime))
+                    if (box is DateTime)
                     {
                         DateTime dateTime = (DateTime)row.ItemArray[field.Column];
                         length = dateTime.ToShortDateString().Length;
@@ -104,6 +120,11 @@ namespace ExcelToSql.Logic
 
         internal void AddIdField(Header header)
         {
+            if (header == null)
+            {
+                return;
+            }
+
             Field fieldId = new Field
             {
                 Row = 0,
@@ -118,6 +139,11 @@ namespace ExcelToSql.Logic
 
         internal void AddExtraFields(Header header)
         {
+            if (header == null)
+            {
+                return;
+            }
+
             if (!string.IsNullOrEmpty(config.OutExtraFields))
             {
                 var outExtraFields = config.OutExtraFields.Split(',');
@@ -125,12 +151,12 @@ namespace ExcelToSql.Logic
                 {
                     string[] extraFields = outExtraField.Split('=');
                     string extraField = extraFields[0];
-                    int extraFieldLength = extraField.Length;
+                    int extraFieldLength = extraField.Length.RoundUp();
                     if (extraFields.Length == 2)
                     {
                         if (!int.TryParse(extraFields[1], out extraFieldLength))
                         {
-                            extraFieldLength = extraField.Length;
+                            extraFieldLength = extraField.Length.RoundUp();
                         };
                     }
 
@@ -139,7 +165,7 @@ namespace ExcelToSql.Logic
                         Row = 0,
                         Column = header.Fields.Count,
                         Text = extraField,
-                        Length = extraFieldLength.RoundUp(),
+                        Length = extraFieldLength,
                         Extra = true,
                         Type = DatabaseEnum.TypeField.Text
                     };
@@ -151,6 +177,10 @@ namespace ExcelToSql.Logic
 
         internal void AddExtraNumberFields(Header header)
         {
+            if (header == null)
+            {
+                return;
+            }
             if (!string.IsNullOrEmpty(config.OutExtraNumberFields))
             {
                 var outExtraNumberFields = config.OutExtraNumberFields.Split(',');
@@ -158,12 +188,12 @@ namespace ExcelToSql.Logic
                 {
                     string[] extraNumberFields = outExtraNumberField.Split('=');
                     string extraNumberField = extraNumberFields[0];
-                    int extraNumberFieldLength = extraNumberField.Length;
+                    int extraNumberFieldLength = extraNumberField.Length.RoundUp();
                     if (extraNumberFields.Length == 2)
                     {
                         if (!int.TryParse(extraNumberFields[1], out extraNumberFieldLength))
                         {
-                            extraNumberFieldLength = extraNumberField.Length;
+                            extraNumberFieldLength = extraNumberField.Length.RoundUp();
                         };
                     }
 
@@ -184,17 +214,29 @@ namespace ExcelToSql.Logic
 
         internal void AddExtraDateFields(Header header)
         {
+            if (header == null)
+            {
+                return;
+            }
+
             if (!string.IsNullOrEmpty(config.OutExtraDateFields))
             {
                 var outExtraDateFields = config.OutExtraDateFields.Split(',');
+                int dateLenght = DateTime.Now.ToShortDateString().Length.RoundUp();
+
                 foreach (string outExtraDateField in outExtraDateFields)
                 {
+                    int length = outExtraDateField.Length.RoundUp();
+                    if (length < dateLenght)
+                    {
+                        length = dateLenght;
+                    }
                     Field fieldExtra = new Field
                     {
                         Row = 0,
                         Column = header.Fields.Count,
                         Text = outExtraDateField,
-                        Length = 20,
+                        Length = length,
                         Extra = true,
                         Type = DatabaseEnum.TypeField.Date
                     };
@@ -204,8 +246,13 @@ namespace ExcelToSql.Logic
             }
         }
 
-        internal void CreateSqlScript(Header header)
+        public bool CreateSqlScript(Header header)
         {
+            if (header == null)
+            {
+                return false;
+            }
+
             List<string> lines = new List<string>();
             string endField = string.Empty;
 
@@ -244,7 +291,7 @@ namespace ExcelToSql.Logic
                     }
                     if (config.DatabaseVendor == DatabaseEnum.Vendor.Postgres)
                     {
-                        lines.Add($"{field.Name} Date{endField}");
+                        lines.Add($"{field.Name} DATE{endField}");
                     }
                 }
                 else if (field.Type == DatabaseEnum.TypeField.Text)
@@ -262,18 +309,28 @@ namespace ExcelToSql.Logic
 
             if (lines.Count > 0)
             {
-                if (config.DatabaseVendor == DatabaseEnum.Vendor.Oracle || config.DatabaseVendor == DatabaseEnum.Vendor.Postgres)
+                switch (config.DatabaseVendor)
                 {
-                    lines.Add("");
-                    lines.Add($"CREATE UNIQUE INDEX {config.OutTablename}_pk_index ON {config.OutTablename} ({Key.ID.ToLower()});");
+                    case DatabaseEnum.Vendor.Oracle:
+                    case DatabaseEnum.Vendor.Postgres:
+                        lines.Add("");
+                        lines.Add($"CREATE UNIQUE INDEX {config.OutTablename}_pk_index ON {config.OutTablename} ({Key.ID.ToLower()});");
+                        break;
                 }
             }
 
             this.fileSystem.WriteAllLines($"{config.OutPath}\\{config.OutCreateFilename}", lines, Encoding.GetEncoding(config.OutFileEncoding));
+
+            return true;
         }
 
-        internal int InsertSqlScript(Header header, DataTable tabular)
+        public int InsertSqlScript(Header header, DataTable tabular)
         {
+            if (header == null || header.Fields == null || tabular == null || tabular.Rows.Count == 0)
+            {
+                return 0;
+            }
+
             string insertFieldNames = string.Empty;
             string valueExtraFields = string.Empty;
 
