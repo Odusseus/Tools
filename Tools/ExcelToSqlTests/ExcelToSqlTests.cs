@@ -1,16 +1,17 @@
 ﻿using System.Diagnostics.CodeAnalysis;
+using AutoFixture;
 using FluentAssertions;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
+using Xunit;
 
 namespace ExcelToSql.Tests
 {
-    [TestClass()]
+    //[TestClass()]
     [ExcludeFromCodeCoverage]
     public class ExcelToSqlTests
     {
         #region GetHelp
 
-        [TestMethod()]
+        [Fact]
         public void GetHelp_Without_Arguments_Should_Retrun_True()
         {
             string[] args = { };
@@ -19,16 +20,19 @@ namespace ExcelToSql.Tests
             result.Should().BeTrue();
         }
 
-        [TestMethod()]
+        [Fact]
         public void GetHelp_With_Arguments_Dummy_Should_Retrun_True()
         {
-            string[] args = { "Dummy" };
+            Fixture fixture = new Fixture();
+            var arg = fixture.Create("arg");
+
+            string[] args = { arg };
             bool result = ExcelToSql.GetHelp(args);
 
             result.Should().BeTrue();
         }
 
-        [TestMethod()]
+        [Fact]
         public void GetHelp_With_Arguments_GO_Should_Retrun_False()
         {
             string[] args = { "GO" };
@@ -37,7 +41,7 @@ namespace ExcelToSql.Tests
             result.Should().BeFalse();
         }
 
-        [TestMethod()]
+        [Fact]
         public void GetHelp_With_Arguments_go_Should_Retrun_False()
         {
             string[] args = { "go" };
@@ -46,7 +50,7 @@ namespace ExcelToSql.Tests
             result.Should().BeFalse();
         }
 
-        [TestMethod()]
+        [Fact]
         public void GetHelp_With_Argument_Null_Should_Retrun_True()
         {
             string[] args = { null };

@@ -6,13 +6,12 @@ using System.Diagnostics.CodeAnalysis;
 using System.Text;
 using ExcelToSql.Enum;
 using FluentAssertions;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Moq;
 using Newtonsoft.Json;
+using Xunit;
 
 namespace ExcelToSql.Logic.Tests
 {
-    [TestClass()]
     [ExcludeFromCodeCoverage]
     public class GenerateFilesTests
     {
@@ -28,8 +27,7 @@ namespace ExcelToSql.Logic.Tests
         private Mock<IOutputWriter> outputWriterMock;
         private IOutputWriter outputWriter;
 
-        [TestInitialize]
-        public void TestInitialize()
+        public GenerateFilesTests()
         {
             this.configMock = new Mock<IConfig>();
             this.config = this.configMock.Object;
@@ -44,7 +42,9 @@ namespace ExcelToSql.Logic.Tests
             this.outputWriter = this.outputWriterMock.Object;
         }
 
-        [TestMethod()]
+
+
+        [Fact]
         public void RunTest_Return_True()
         {
             // Arrange
@@ -66,7 +66,7 @@ namespace ExcelToSql.Logic.Tests
             spreadsheetMock.Verify(s => s.GetTabular(), Times.Once);
         }
 
-        [TestMethod()]
+        [Fact]
         public void RunTest_Return_False_When_Header()
         {
             // Arrange
@@ -88,7 +88,7 @@ namespace ExcelToSql.Logic.Tests
             spreadsheetMock.Verify(s => s.GetTabular(), Times.Once);
         }
 
-        [TestMethod()]
+        [Fact]
         public void GetHeaderTest_Should_Return_Header_With_8_Fields()
         {
             // Arrange
@@ -105,7 +105,7 @@ namespace ExcelToSql.Logic.Tests
             header.Fields.Count.Should().Be(8);
         }
 
-        [TestMethod()]
+        [Fact]
         public void GetHeaderTest_Should_Return_Header_With_0_Fields()
         {
             // Arrange
@@ -123,7 +123,7 @@ namespace ExcelToSql.Logic.Tests
             header.Fields.Count.Should().Be(0);
         }
 
-        [TestMethod()]
+        [Fact]
         public void SetFieldLength_Should_Let_DataTable_And_Null_When_There_Are_Null()
         {
             // Arrange
@@ -140,7 +140,7 @@ namespace ExcelToSql.Logic.Tests
             header.Should().BeNull();
         }
 
-        [TestMethod()]
+        [Fact]
         public void SetFieldLength_Should_Not_Change_Hasch_From_DataTable_When_Header_Is_Null()
         {
             // Arrange
@@ -157,7 +157,7 @@ namespace ExcelToSql.Logic.Tests
             dataTable.GetHashCode().Should().Be(dataTableHash);
         }
 
-        [TestMethod()]
+        [Fact]
         public void SetFieldLength_Should_Let_DataTable_Null_When_It_Is_Null()
         {
             // Arrange
@@ -174,7 +174,7 @@ namespace ExcelToSql.Logic.Tests
             dataTable.GetHashCode().Should().Be(dataTableHash);
         }
 
-        [TestMethod()]
+        [Fact]
         public void SetFieldLength_Should_Set_The_Length_Followed_The_Field_Length()
         {
             // Arrange
@@ -242,7 +242,7 @@ namespace ExcelToSql.Logic.Tests
             header.Fields.Find(f => f.Name == "Salary".ToLower()).Length.Should().Be(30);
         }
 
-        [TestMethod()]
+        [Fact]
         public void AddIdField_Should_Let_Header_Null_When_It_Is_Null()
         {
             // Arrange
@@ -256,7 +256,7 @@ namespace ExcelToSql.Logic.Tests
             header.Should().BeNull();
         }
 
-        [TestMethod()]
+        [Fact]
         public void AddIdField_Should_Add_Id_To_The_Header()
         {
             // Arrange
@@ -272,7 +272,7 @@ namespace ExcelToSql.Logic.Tests
 
         #region AddExtraFields
 
-        [TestMethod()]
+        [Fact]
         public void AddExtraFields_Let_Header_Null_When_Is_Null()
         {
             // Arrange
@@ -287,7 +287,7 @@ namespace ExcelToSql.Logic.Tests
             header.Should().BeNull();
         }
 
-        [TestMethod()]
+        [Fact]
         public void AddExtraFields_Should_Add_Label_Field_When_It_Is_a_OutExtraFields()
         {
             // Arrange
@@ -307,7 +307,7 @@ namespace ExcelToSql.Logic.Tests
             header.Fields.Find(f => f.Name == fieldName).Extra.Should().BeTrue();
         }
 
-        [TestMethod()]
+        [Fact]
         public void AddExtraFields_Should_Add_Label_And_Message_Field_When_There_Are_OutExtraFields()
         {
             // Arrange
@@ -328,7 +328,7 @@ namespace ExcelToSql.Logic.Tests
             header.Fields.Find(f => f.Name == message).Name.Should().Be(message);
         }
 
-        [TestMethod()]
+        [Fact]
         public void AddExtraFields_Should_Add_Label_Field_And_Length_When_It_Is_a_OutExtraFields()
         {
             // Arrange
@@ -348,7 +348,7 @@ namespace ExcelToSql.Logic.Tests
             header.Fields.Find(f => f.Name == label).Length.Should().Be(length);
         }
 
-        [TestMethod()]
+        [Fact]
         public void AddExtraFields_Should_Add_Label_And_Message_Fields_With_Lenghts_When_Where_Are_In_OutExtraFields()
         {
             // Arrange
@@ -378,7 +378,7 @@ namespace ExcelToSql.Logic.Tests
 
         #region AddExtraNumberFields
 
-        [TestMethod()]
+        [Fact]
         public void AddExtraNumberFields_Let_Header_Null_When_Is_Null()
         {
             // Arrange
@@ -395,7 +395,7 @@ namespace ExcelToSql.Logic.Tests
             header.Should().BeNull();
         }
 
-        [TestMethod()]
+        [Fact]
         public void AddExtraNumberFields_Should_Add_Label_Field_When_It_Is_a_OutExtraNumberFields()
         {
             // Arrange
@@ -415,7 +415,7 @@ namespace ExcelToSql.Logic.Tests
             header.Fields.Find(f => f.Name == fieldName).Extra.Should().BeTrue();
         }
 
-        [TestMethod()]
+        [Fact]
         public void AddExtraNumberFields_Should_Add_Label_And_Message_Field_When_There_Are_OutExtraNumberFields()
         {
             // Arrange
@@ -436,7 +436,7 @@ namespace ExcelToSql.Logic.Tests
             header.Fields.Find(f => f.Name == message).Name.Should().Be(message);
         }
 
-        [TestMethod()]
+        [Fact]
         public void AddExtraNumberFields_Should_Add_Label_Field_And_Length_When_It_Is_a_OutExtraNumberFields()
         {
             // Arrange
@@ -456,7 +456,7 @@ namespace ExcelToSql.Logic.Tests
             header.Fields.Find(f => f.Name == label).Length.Should().Be(length);
         }
 
-        [TestMethod()]
+        [Fact]
         public void AddExtraNumberFields_Should_Add_Label_And_Message_Fields_With_Lenghts_When_Where_Are_In_OutExtraNumberFields()
         {
             // Arrange
@@ -486,7 +486,7 @@ namespace ExcelToSql.Logic.Tests
 
         #region AddExtraDateFields
 
-        [TestMethod()]
+        [Fact]
         public void AddExtraDateFields_Let_Header_Null_When_Is_Null()
         {
             // Arrange
@@ -503,7 +503,7 @@ namespace ExcelToSql.Logic.Tests
             header.Should().BeNull();
         }
 
-        [TestMethod()]
+        [Fact]
         public void AddExtraDateFields_Should_Add_Label_Field_When_It_Is_a_OutExtraDateFields()
         {
             // Arrange
@@ -523,7 +523,7 @@ namespace ExcelToSql.Logic.Tests
             header.Fields.Find(f => f.Name == fieldName).Extra.Should().BeTrue();
         }
 
-        [TestMethod()]
+        [Fact]
         public void AddExtraDateFields_Should_Add_Label_And_Message_Field_When_There_Are_OutExtraDateFields()
         {
             // Arrange
@@ -544,7 +544,7 @@ namespace ExcelToSql.Logic.Tests
             header.Fields.Find(f => f.Name == message).Name.Should().Be(message);
         }
 
-        [TestMethod()]
+        [Fact]
         public void AddExtraDateFields_Should_Add_Label_Field_And_Length_When_It_Is_a_OutExtraDateFields()
         {
             // Arrange
@@ -563,7 +563,7 @@ namespace ExcelToSql.Logic.Tests
             header.Fields.Find(f => f.Name == label).Length.Should().Be(20);
         }
 
-        [TestMethod()]
+        [Fact]
         public void AddExtraDateFields_Should_Add_Label_And_Message_Fields_With_Lenghts_When_Where_Are_In_OutExtraDateFields()
         {
             // Arrange
@@ -588,7 +588,7 @@ namespace ExcelToSql.Logic.Tests
 
         #region CreateSqlScript
 
-        [TestMethod()]
+        [Fact]
         public void CreateSqlScript_Return_False_When_Header_Is_Null()
         {
             // Arrange
@@ -603,7 +603,7 @@ namespace ExcelToSql.Logic.Tests
             result.Should().BeFalse();
         }
 
-        [TestMethod()]
+        [Fact]
         public void CreateSqlScript_Return_Postgres_Script_When_Vendor_Is_Postpres()
         {
             // Arrange
@@ -663,7 +663,7 @@ namespace ExcelToSql.Logic.Tests
             lines[5].Should().Be("CREATE UNIQUE INDEX person_pk_index ON person (id);");
         }
 
-        [TestMethod()]
+        [Fact]
         public void CreateSqlScript_Return_Oracle_Script_When_Vendor_Is_Postpres()
         {
             // Arrange
@@ -727,7 +727,7 @@ namespace ExcelToSql.Logic.Tests
 
         #region InsertSqlScript
 
-        [TestMethod()]
+        [Fact]
         public void InsertSqlScript_Should_Return_0_When_Header_Is_Null()
         {
             // Arrange
@@ -743,7 +743,7 @@ namespace ExcelToSql.Logic.Tests
             result.Should().Be(0);
         }
 
-        [TestMethod()]
+        [Fact]
         public void InsertSqlScript_Should_Return_0_When_HeaderFileds_Is_Null()
         {
             // Arrange
@@ -759,7 +759,7 @@ namespace ExcelToSql.Logic.Tests
             result.Should().Be(0);
         }
 
-        [TestMethod()]
+        [Fact]
         public void InsertSqlScript_Should_Return_0_When_DataTable_Is_Null()
         {
             // Arrange
@@ -778,7 +778,7 @@ namespace ExcelToSql.Logic.Tests
             result.Should().Be(0);
         }
 
-        [TestMethod()]
+        [Fact]
         public void InsertSqlScript_Should_Return_0_When_DataTableRows_Is_Null()
         {
             // Arrange
@@ -797,7 +797,7 @@ namespace ExcelToSql.Logic.Tests
             result.Should().Be(0);
         }
 
-        [TestMethod()]
+        [Fact]
         public void InsertSqlScript_Should_Return_0_When_Header_And_DataTable_Are_Null()
         {
             // Arrange
@@ -813,7 +813,7 @@ namespace ExcelToSql.Logic.Tests
             result.Should().Be(0);
         }
 
-        [TestMethod()]
+        [Fact]
         public void InsertSqlScript_Should_Return_0_When_HeaderFileds_And_DataTableRows_Are_Null()
         {
             // Arrange
@@ -829,7 +829,7 @@ namespace ExcelToSql.Logic.Tests
             result.Should().Be(0);
         }
 
-        [TestMethod()]
+        [Fact]
         public void InsertSqlScript_Should_Return_Postgres_Insert_Script()
         {
             // Arrange
@@ -927,7 +927,7 @@ namespace ExcelToSql.Logic.Tests
             lines[1].Should().Be("INSERT INTO person (lastname, firstname, name, dateofbirth, salary, id, externalnumber, message) VALUES ('abc', 'abcdefghijklmnopqrstw', 'aaa', '15-10-1901', '1000000000000000000000', 2, null, null);");
         }
 
-        [TestMethod()]
+        [Fact]
         public void InsertSqlScript_Should_Return_Oracle_Insert_Script()
         {
             // Arrange

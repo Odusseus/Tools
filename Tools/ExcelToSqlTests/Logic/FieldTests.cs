@@ -2,15 +2,14 @@
 using ExcelToSql.Enum;
 using ExcelToSql.Logic;
 using FluentAssertions;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
+using Xunit;
 
 namespace ExcelToSqlTests.Logic
 {
-    [TestClass]
     [ExcludeFromCodeCoverage]
     public class FieldTests
     {
-        [TestMethod]
+        [Fact]
         public void Field_Object_Is_Correct_Filled()
         {
             // Arrange
@@ -43,7 +42,7 @@ namespace ExcelToSqlTests.Logic
             field.Type.Should().Be(type);
         }
 
-        [TestMethod]
+        [Fact]
         public void Field_Name_Is_Trimed()
         {
             // Arrange
@@ -60,7 +59,7 @@ namespace ExcelToSqlTests.Logic
             field.Name.Should().Be(nameAssert);
         }
 
-        [TestMethod]
+        [Fact]
         public void Field_Name_Quotes_Ares_Replaced_With_Underscores()
         {
             // Arrange
@@ -77,7 +76,7 @@ namespace ExcelToSqlTests.Logic
             field.Name.Should().Be(nameAssert);
         }
 
-        [TestMethod]
+        [Fact]
         public void Field_Name_Space_Ares_Replaced_With_Underscores()
         {
             // Arrange

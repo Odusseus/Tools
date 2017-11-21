@@ -1,15 +1,14 @@
 ﻿using System.Diagnostics.CodeAnalysis;
 using System.Reflection;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Moq;
+using Xunit;
 
 namespace ExcelToSql.Logic.Tests
 {
-    [TestClass()]
     [ExcludeFromCodeCoverage]
     public class HelpTests
     {
-        [TestMethod()]
+        [Fact]
         public void WriteTest_Should_Write_At_Least_One()
         {
             // Arrange

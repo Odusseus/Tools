@@ -1,23 +1,27 @@
 ﻿using System.Diagnostics.CodeAnalysis;
+using AutoFixture;
 using ExcelToSql.Constant;
 using ExcelToSql.Enum;
 using FluentAssertions;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Moq;
+using Xunit;
 
 namespace ExcelToSql.Logic.Tests
 {
-    [TestClass()]
     [ExcludeFromCodeCoverage]
     public class ConfigTests
     {
-        [TestMethod()]
+        [Fact]
         public void ConfigTest_Should_Return_DatabaseVendor_Oracle_By_Default()
         {
             // Arrange
             Mock<IConfigurationManagerLoader> configurationManagerLoaderMock = new Mock<IConfigurationManagerLoader>();
             IConfigurationManagerLoader configurationManagerLoader = configurationManagerLoaderMock.Object;
-            configurationManagerLoaderMock.Setup(c => c.KeyDatabaseVendor).Returns("ABC");
+
+            Fixture fixture = new Fixture();
+            var databaseVendor = fixture.Create("vendor");
+
+            configurationManagerLoaderMock.Setup(c => c.KeyDatabaseVendor).Returns(databaseVendor);
 
             // Act
             Config config = new Config(configurationManagerLoader);
@@ -26,7 +30,7 @@ namespace ExcelToSql.Logic.Tests
             config.DatabaseVendor.Should().Be(DatabaseEnum.Vendor.Oracle);
         }
 
-        [TestMethod()]
+        [Fact]
         public void ConfigTest_Should_Return_DatabaseVendor_Oracle_When_DatabaseVendor_Is_Oracle()
         {
             // Arrange
@@ -41,7 +45,7 @@ namespace ExcelToSql.Logic.Tests
             config.DatabaseVendor.Should().Be(DatabaseEnum.Vendor.Oracle);
         }
 
-        [TestMethod()]
+        [Fact]
         public void ConfigTest_Should_Return_DatabaseVendor_Postgres_When_DatabaseVendor_Is_Postgres()
         {
             // Arrange
@@ -56,7 +60,7 @@ namespace ExcelToSql.Logic.Tests
             config.DatabaseVendor.Should().Be(DatabaseEnum.Vendor.Postgres);
         }
 
-        [TestMethod()]
+        [Fact]
         public void ConfigTest_Should_Return_ExcelFilename_When_This_Is_abc()
         {
             // Arrange
@@ -71,7 +75,7 @@ namespace ExcelToSql.Logic.Tests
             config.ExcelFilename.Should().Be("abc");
         }
 
-        [TestMethod()]
+        [Fact]
         public void ConfigTest_Should_Return_ExcelPath_When_This_Is_abc()
         {
             // Arrange
@@ -86,7 +90,7 @@ namespace ExcelToSql.Logic.Tests
             config.ExcelPath.Should().Be("abc");
         }
 
-        [TestMethod()]
+        [Fact]
         public void ConfigTest_Should_Return_ExcelTabular_When_This_Is_abc()
         {
             // Arrange
@@ -101,7 +105,7 @@ namespace ExcelToSql.Logic.Tests
             config.ExcelTabular.Should().Be("abc");
         }
 
-        [TestMethod()]
+        [Fact]
         public void ConfigTest_Should_Return_OutCreateFilename_When_This_Is_abc()
         {
             // Arrange
@@ -116,7 +120,7 @@ namespace ExcelToSql.Logic.Tests
             config.OutCreateFilename.Should().Be("abc");
         }
 
-        [TestMethod()]
+        [Fact]
         public void ConfigTest_Should_Return_OutExtraDateFields_When_This_Is_abc()
         {
             // Arrange
@@ -131,7 +135,7 @@ namespace ExcelToSql.Logic.Tests
             config.OutExtraDateFields.Should().Be("abc");
         }
 
-        [TestMethod()]
+        [Fact]
         public void ConfigTest_Should_Return_OutExtraFields_When_This_Is_abc()
         {
             // Arrange
@@ -146,7 +150,7 @@ namespace ExcelToSql.Logic.Tests
             config.OutExtraFields.Should().Be("abc");
         }
 
-        [TestMethod()]
+        [Fact]
         public void ConfigTest_Should_Return_OutExtraNumberFields_When_This_Is_abc()
         {
             // Arrange
@@ -161,7 +165,7 @@ namespace ExcelToSql.Logic.Tests
             config.OutExtraNumberFields.Should().Be("abc");
         }
 
-        [TestMethod()]
+        [Fact]
         public void ConfigTest_Should_Return_OutFileEncoding_123_When_This_Is_123()
         {
             // Arrange
@@ -176,7 +180,7 @@ namespace ExcelToSql.Logic.Tests
             config.OutFileEncoding.Should().Be(123);
         }
 
-        [TestMethod()]
+        [Fact]
         public void ConfigTest_Should_Return_OutFileEncoding_Utf8_By_Default()
         {
             // Arrange
@@ -191,7 +195,7 @@ namespace ExcelToSql.Logic.Tests
             config.OutFileEncoding.Should().Be(Key.Utf8);
         }
 
-        [TestMethod()]
+        [Fact]
         public void ConfigTest_Should_Return_OutInsertFilename_When_This_Is_abc()
         {
             // Arrange
@@ -206,7 +210,7 @@ namespace ExcelToSql.Logic.Tests
             config.OutInsertFilename.Should().Be("abc");
         }
 
-        [TestMethod()]
+        [Fact]
         public void ConfigTest_Should_Return_OutPath_When_This_Is_abc()
         {
             // Arrange
@@ -221,7 +225,7 @@ namespace ExcelToSql.Logic.Tests
             config.OutPath.Should().Be("abc");
         }
 
-        [TestMethod()]
+        [Fact]
         public void ConfigTest_Should_Return_OutStartId_0_By_Default()
         {
             // Arrange
@@ -236,7 +240,7 @@ namespace ExcelToSql.Logic.Tests
             config.OutStartId.Should().Be(0);
         }
 
-        [TestMethod()]
+        [Fact]
         public void ConfigTest_Should_Return_OutStartId_123_When_This_Is_123()
         {
             // Arrange
@@ -251,7 +255,7 @@ namespace ExcelToSql.Logic.Tests
             config.OutStartId.Should().Be(123);
         }
 
-        [TestMethod()]
+        [Fact]
         public void ConfigTest_Should_Return_OutTablename_When_This_Is_abc()
         {
             // Arrange
@@ -266,7 +270,7 @@ namespace ExcelToSql.Logic.Tests
             config.OutTablename.Should().Be("abc");
         }
 
-        [TestMethod()]
+        [Fact]
         public void ConfigTest()
         {
             // Act

@@ -21,3 +21,6 @@ https://stackoverflow.com/questions/249087/how-do-i-remove-diacritics-accents-fr
 Create DataTable 
 https://code.msdn.microsoft.com/windowsdesktop/How-to-create-DataTable-25f6c390
 https://social.msdn.microsoft.com/Forums/vstudio/en-US/6ffcb247-77fb-40b4-bcba-08ba377ab9db/converting-a-list-to-datatable?forum=csharpgeneral
+
+MSTest vs xUnit
+http://blog.ploeh.dk/2010/04/26/WhyImmigratingfromMSTesttoxUnit.net/
