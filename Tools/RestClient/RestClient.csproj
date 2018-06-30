@@ -69,6 +69,7 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Alfresco\Book.cs" />
     <Compile Include="Alfresco\BookResponse.cs" />
     <Compile Include="Alfresco\Entries.cs" />
     <Compile Include="Alfresco\Entry.cs" />
