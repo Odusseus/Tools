@@ -20,6 +20,8 @@ namespace RestClient
             }
             else
             {
+                IBaseClient baseClient = container.Resolve<IBaseClient>();
+                baseClient.Run();
             }
         }
 

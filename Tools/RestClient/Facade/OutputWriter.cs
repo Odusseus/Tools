@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Diagnostics.CodeAnalysis;
 
-namespace RestClient.Logic
+namespace RestClient.Facade
 {
     [ExcludeFromCodeCoverage]
     public class OutputWriter : IOutputWriter

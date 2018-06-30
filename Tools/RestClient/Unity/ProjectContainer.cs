@@ -1,5 +1,6 @@
 ﻿using System.Diagnostics.CodeAnalysis;
 using RestClient.Logic;
+using RestClient.Facade;
 using Unity;
 
 namespace RestClient.Unity
@@ -12,6 +13,7 @@ namespace RestClient.Unity
             container.RegisterType<IAssemblyLoader, AssemblyLoader>();
             container.RegisterType<IHelp, Help>();
             container.RegisterType<IOutputWriter, OutputWriter>();
+            container.RegisterType<IBaseClient, BaseClient>();
         }
     }
 }

@@ -1,4 +1,6 @@
-﻿namespace RestClient.Logic
+﻿using RestClient.Facade;
+
+namespace RestClient.Logic
 {
     public class Help : IHelp
     {

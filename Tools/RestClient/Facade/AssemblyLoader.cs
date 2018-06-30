@@ -1,7 +1,7 @@
 ﻿using System.Diagnostics.CodeAnalysis;
 using System.Reflection;
 
-namespace RestClient.Logic
+namespace RestClient.Facade
 {
     [ExcludeFromCodeCoverage]
     public class AssemblyLoader : IAssemblyLoader

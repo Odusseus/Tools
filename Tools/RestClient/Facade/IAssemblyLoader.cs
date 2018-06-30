@@ -1,6 +1,6 @@
 ﻿using System.Reflection;
 
-namespace RestClient.Logic
+namespace RestClient.Facade
 {
     public interface IAssemblyLoader
     {

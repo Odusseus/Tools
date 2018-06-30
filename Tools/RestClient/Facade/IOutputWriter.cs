@@ -1,4 +1,4 @@
-﻿namespace RestClient.Logic
+﻿namespace RestClient.Facade
 {
     public interface IOutputWriter
     {
