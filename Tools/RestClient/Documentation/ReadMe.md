@@ -6,3 +6,4 @@
 
 > http://www.diogonunes.com/blog/webclient-vs-httpclient-vs-httpwebrequest/
 
+> http://docs.alfresco.com/5.2/pra/1/concepts/pra-response.html

@@ -35,6 +35,9 @@
     <Reference Include="CommonServiceLocator, Version=2.0.3.0, Culture=neutral, PublicKeyToken=489b6accfaf20ef0, processorArchitecture=MSIL">
       <HintPath>..\packages\Unity.5.8.6\lib\net46\CommonServiceLocator.dll</HintPath>
     </Reference>
+    <Reference Include="Newtonsoft.Json, Version=11.0.0.0, Culture=neutral, PublicKeyToken=30ad4fe6b2a6aeed, processorArchitecture=MSIL">
+      <HintPath>..\packages\Newtonsoft.Json.11.0.2\lib\net45\Newtonsoft.Json.dll</HintPath>
+    </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core" />
     <Reference Include="System.Xml.Linq" />
@@ -66,6 +69,11 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Alfresco\BookResponse.cs" />
+    <Compile Include="Alfresco\Entries.cs" />
+    <Compile Include="Alfresco\Entry.cs" />
+    <Compile Include="Alfresco\BookList.cs" />
+    <Compile Include="Alfresco\Pagination.cs" />
     <Compile Include="Constant\Key.cs" />
     <Compile Include="Facade\AssemblyLoader.cs" />
     <Compile Include="Facade\HttpClientx.cs" />
