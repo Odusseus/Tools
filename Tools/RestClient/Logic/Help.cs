@@ -19,7 +19,7 @@ namespace RestClient.Logic
             this.outputWriter.WriteLine($"RestClient version {version}, 29-06-2018, author Odusseus, https://github.com/Odusseus ");
             this.outputWriter.WriteLine("RestClient go          execute the program");
             this.outputWriter.WriteLine("RestClient             call the help");
-            this.outputWriter.WriteLine("Configuration are in the RestClient.Exe.Config file.");            
+            this.outputWriter.WriteLine("Configuration are in the RestClient.Exe.Config file.");
         }
     }
 }

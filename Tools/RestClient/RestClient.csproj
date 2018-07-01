@@ -70,15 +70,8 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Alfresco\Book.cs" />
-    <Compile Include="Alfresco\BookResponse.cs" />
-    <Compile Include="Alfresco\Entries.cs" />
-    <Compile Include="Alfresco\Entry.cs" />
-    <Compile Include="Alfresco\BookList.cs" />
-    <Compile Include="Alfresco\Pagination.cs" />
     <Compile Include="Constant\Key.cs" />
     <Compile Include="Facade\AssemblyLoader.cs" />
-    <Compile Include="Facade\HttpClientx.cs" />
-    <Compile Include="Facade\IHttpClientx.cs" />
     <Compile Include="Logic\BaseClient.cs" />
     <Compile Include="Logic\Help.cs" />
     <Compile Include="Facade\IAssemblyLoader.cs" />

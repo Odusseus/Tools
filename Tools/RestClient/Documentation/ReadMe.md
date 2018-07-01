@@ -8,4 +8,5 @@
 
 > http://docs.alfresco.com/5.2/pra/1/concepts/pra-response.html
 
-https://app.quicktype.io/#l=cs&r=json2csharp
+! Be careful:  works only in Chrome.
+> https://app.quicktype.io/#l=cs&r=json2csharp

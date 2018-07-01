@@ -3,21 +3,21 @@ using System.Net.Http;
 using System.Net.Http.Headers;
 using System.Text;
 using System.Threading.Tasks;
+using Newtonsoft.Json;
 using QuickType;
-using RestClient.Facade;
+using RestClient.Alfresco;
 
-namespace RestClient.Logic
+namespace RestClient.Old
 {
-    public class BaseClient : IBaseClient
+    public class BaseClient 
     {
         private readonly HttpClient httpClient;
+        private BookList bookList;
         private Book book;
-        private readonly IOutputWriter outputWriter;
 
-        public BaseClient(IOutputWriter outputWriter)
+        public BaseClient()
         {
             this.httpClient = new HttpClient();
-            this.outputWriter = outputWriter;
         }
 
         public bool Run()
@@ -40,28 +40,30 @@ namespace RestClient.Logic
 
             try
             {
-                bool isSucceful = await PostBookAsync();
-                if (isSucceful)
+                string message = await PostBookAsync();
+                if (message == null)
                 {
+                    //foreach(Entry entry in this.bookList.entries.entries)
+                    //{
+                    //Console.WriteLine($"id {entry.id} name {entry.name} modifiedAt {entry.modifiedAt}");
+                    //}
+
                     foreach (QuickType.EntryElement entry in this.book.List.Entries)
                     {
-                        this.outputWriter.WriteLine($"id {entry.Entry.Id} name {entry.Entry.Name} modifiedAt {entry.Entry.ModifiedAt}");
+                        Console.WriteLine($"id {entry.Entry.Id} name {entry.Entry.Name} modifiedAt {entry.Entry.ModifiedAt}");
                     }
-                }
-                else
-                {
-                    this.outputWriter.WriteLine("PostBookAsync is not succeed.");
+                    Console.ReadLine();
                 }
             }
             catch (Exception e)
             {
-                this.outputWriter.WriteLine(e.Message);
+                Console.WriteLine(e.Message);
             }
 
             Console.ReadLine();
         }
 
-        private async Task<bool> PostBookAsync()
+        private async Task<string> PostBookAsync()
         {
             string responseContent = null;
             string requestUri = "https://api-explorer.alfresco.com/alfresco/api/-default-/public/search/versions/1/search";
@@ -79,10 +81,27 @@ namespace RestClient.Logic
             if (response.IsSuccessStatusCode)
             {
                 responseContent = await response.Content.ReadAsStringAsync();
-                this.book = Book.FromJson(responseContent);
-            }
+                // JObject responseObject = JObject.Parse(responseContent);
 
-            return true;
+                // string totalItems = (string)responseObject["list"]["pagination"]["totalItems"];
+                // //JArray entries = (JArray)responseObject["list"]["entries"];
+
+                //// BookList bookList = JsonConvert.DeserializeObject<BookList>(responseContent);
+
+                // dynamic responseObjects = JObject.Parse(responseContent);
+
+                // //var xx = responseObjects.list.pagination.totalItems;
+
+                // this.bookList = new BookList();
+
+                // foreach(dynamic entry in responseObjects.list.entries)
+                // {
+                //     this.bookList.AddEntry(entry);
+                // }
+
+                this.book = JsonConvert.DeserializeObject<Book>(responseContent);
+            }
+            return null;
         }
     }
 }
