@@ -1,4 +1,5 @@
 ﻿using System;
+using System.IO;
 using System.Net.Http;
 using System.Net.Http.Headers;
 using System.Text;
@@ -26,7 +27,7 @@ namespace RestClient.Logic
             return true;
         }
 
-        public async Task RunAsync()
+        private async Task RunAsync()
         {
             this.httpClient.BaseAddress = new Uri("https://api-explorer.alfresco.com");
             this.httpClient.DefaultRequestHeaders.Accept.Clear();
@@ -46,6 +47,8 @@ namespace RestClient.Logic
                     foreach (QuickType.EntryElement entry in this.book.List.Entries)
                     {
                         this.outputWriter.WriteLine($"id {entry.Entry.Id} name {entry.Entry.Name} modifiedAt {entry.Entry.ModifiedAt}");
+
+                        bool isDownloaded = RunDownload(entry.Entry.Id, entry.Entry.Name);
                     }
                 }
                 else
@@ -58,9 +61,9 @@ namespace RestClient.Logic
                 this.outputWriter.WriteLine(e.Message);
             }
 
+            this.outputWriter.WriteLine("SVP Press any key to continue.");
             Console.ReadLine();
         }
-
         private async Task<bool> PostBookAsync()
         {
             string responseContent = null;
@@ -83,6 +86,25 @@ namespace RestClient.Logic
             }
 
             return true;
+        }
+
+        private bool RunDownload(string id, string name)
+        {
+            DownloadFile(id, name).GetAwaiter().GetResult();
+            return true;
+        }
+
+        private async Task DownloadFile(string id, string name)
+        {
+            var fileStream = await this.httpClient.GetStreamAsync("https://api-explorer.alfresco.com/alfresco/api/-default-/public/alfresco/versions/1/nodes/4a2919e1-d82d-428b-86f7-dfb32ca2c413/content?attachment=true");
+            using (var memoryStream = new MemoryStream())
+            {
+                await fileStream.CopyToAsync(memoryStream);
+                using (FileStream file = new FileStream($"{id}-{name}", FileMode.Create, FileAccess.Write)) {
+                    memoryStream.WriteTo(file);
+                }
+            }
+            
         }
     }
 }
