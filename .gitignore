@@ -261,3 +261,4 @@ __pycache__/
 *.pyc
 /Tools/ExcelToSql/Data/CreateSalesOrders.sql
 /Tools/ExcelToSql/Data/InsertSalesOrders.sql
+/metalimes/metalimes/wwwroot/lib
