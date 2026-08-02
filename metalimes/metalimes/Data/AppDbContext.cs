@@ -11,18 +11,18 @@ namespace metalimes.Data
         {
         }
 
-        public DbSet<User> Users { get; set; }
-        public DbSet<Log> Logs { get; set; }
+        public DbSet<Users> Users { get; set; }
+        public DbSet<Logs> Logs { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             // User.Username moet uniek zijn
-            modelBuilder.Entity<User>()
+            modelBuilder.Entity<Users>()
                 .HasIndex(u => u.Username)
                 .IsUnique();
 
             // Relatie Log → User (optioneel)
-            modelBuilder.Entity<Log>()
+            modelBuilder.Entity<Logs>()
                 .HasOne(l => l.User)
                 .WithMany()
                 .HasForeignKey(l => l.UserId)
