@@ -1,0 +1,59 @@
+@page
+@model AdminDashboardModel
+@{
+    ViewData["Title"] = "Admin Dashboard";
+}
+
+<div class="container mt-5">
+    <h1>Admin Dashboard</h1>
+
+    <div class="row mt-4">
+        <div class="col-md-6">
+            <h2>Alle Gebruikers</h2>
+            <table class="table table-striped">
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>Gebruikersnaam</th>
+                        <th>Aangemaakt op</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var user in Model.Users)
+                    {
+                        <tr>
+                            <td>@user.Id</td>
+                            <td>@user.Username</td>
+                            <td>@user.CreatedAt.ToString("dd/MM/yyyy HH:mm")</td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+
+        <div class="col-md-6">
+            <h2>Alle Logs</h2>
+            <table class="table table-striped">
+                <thead>
+                    <tr>
+                        <th>Timestamp</th>
+                        <th>Bericht</th>
+                        <th>Level</th>
+                        <th>UserId</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var log in Model.Logs)
+                    {
+                        <tr>
+                            <td>@log.Timestamp.ToString("dd/MM/yyyy HH:mm:ss")</td>
+                            <td>@log.Message</td>
+                            <td><span class="badge bg-info">@log.Level</span></td>
+                            <td>@log.UserId</td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>

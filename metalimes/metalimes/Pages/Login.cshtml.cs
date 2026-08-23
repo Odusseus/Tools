@@ -56,12 +56,23 @@ namespace metalimes.Pages
                 ModelState.AddModelError(string.Empty, "Ongeldige gebruikersnaam of wachtwoord.");
                 return Page();
             }
-
-
+            
             var hasher = new PasswordHasher<Users>();
             var result = hasher.VerifyHashedPassword(user, user.PasswordHash, Password);
             if (result == PasswordVerificationResult.Success)
             {
+                Logs logs = new Logs("Login")
+                {
+                    Message = "Successful login attempt " + Username,
+                    Level = "Info",
+                    UserId = user.Id,
+                    Timestamp = DateTime.UtcNow
+                };
+
+                // optionally persist the log:
+                _db.Add(logs);
+                await _db.SaveChangesAsync();
+
                 var claims = new List<Claim>
                 {
                     new Claim(ClaimTypes.NameIdentifier, user.Id.ToString()),
@@ -72,8 +83,25 @@ namespace metalimes.Pages
 
                 await HttpContext.SignInAsync(CookieAuthenticationDefaults.AuthenticationScheme, principal,
                     new AuthenticationProperties { IsPersistent = false });
-
+                if (user.Username == "pascaladmin")
+                {
+                    return RedirectToPage("/AdminDashboard");
+                }
                 return RedirectToPage("/Bingo");
+            }
+            else
+            {
+                Logs logs = new Logs("Login")
+                {
+                    Message = "Failed login attempt " + Username + " " +Password,
+                    Level = "Info",
+                    UserId = user.Id,
+                    Timestamp = DateTime.UtcNow
+                };
+
+                // optionally persist the log:
+                _db.Add(logs);
+                await _db.SaveChangesAsync();
             }
 
             ModelState.AddModelError(string.Empty, "Ongeldige gebruikersnaam of wachtwoord.");
