@@ -17,6 +17,13 @@ builder.Services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationSc
         options.SlidingExpiration = true;
     });
 
+// Authorization policies
+builder.Services.AddAuthorization(options =>
+{
+    options.AddPolicy("AdminOnly", policy =>
+        policy.RequireClaim("role", "admin"));
+});
+
 builder.Services.AddAuthorization();
 
 // Register AppDbContext with SQLite provider using connection string from configuration.
@@ -58,18 +65,19 @@ using (var scope = app.Services.CreateScope())
     db.Database.Migrate();   // maakt database + tabellen automatisch aan
 
     // Seed a default admin user if none exists (password = "password")
-    if (!db.Users.Any())
-    {
-        var admin = new Users
-        {
-            Username = "admin",
-            CreatedAt = DateTime.UtcNow
-        };
-        var hasher = new PasswordHasher<Users>();
-        admin.PasswordHash = hasher.HashPassword(admin, "password");
-        db.Users.Add(admin);
-        db.SaveChanges();
-    }
+    //if (!db.Users.Any())
+    //{
+    //    var admin = new Users
+    //    {
+    //        Username = "admin",
+    //        Role = "admin",
+    //        CreatedAt = DateTime.UtcNow
+    //    };
+    //    var hasher = new PasswordHasher<Users>();
+    //    admin.PasswordHash = hasher.HashPassword(admin, "password");
+    //    db.Users.Add(admin);
+    //    db.SaveChanges();
+    //}
 }
 
 app.Run();

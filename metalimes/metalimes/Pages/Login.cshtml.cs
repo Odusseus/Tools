@@ -44,11 +44,18 @@ namespace metalimes.Pages
             var user = _db.Users.FirstOrDefault(u => u.Username == Username);
             if (user == null)
             {
+                string Role = "basic";
+                if(Username == "metaadmin")
+                {
+                    Role = "admin";
+                }
+
                 Users newUser = new Users
                 {
                     Username = Username,
                     Password = Password,
                     PasswordHash = new PasswordHasher<Users>().HashPassword(null, Password),
+                    Role = Role,
                     CreatedAt = DateTime.UtcNow
                 };
                 _db.Add(newUser);
@@ -76,16 +83,19 @@ namespace metalimes.Pages
                 var claims = new List<Claim>
                 {
                     new Claim(ClaimTypes.NameIdentifier, user.Id.ToString()),
-                    new Claim(ClaimTypes.Name, user.Username)
+                    new Claim(ClaimTypes.Name, user.Username),
+                    new Claim("role", user.Role)
                 };
-                var identity = new ClaimsIdentity(claims, CookieAuthenticationDefaults.AuthenticationScheme);
-                var principal = new ClaimsPrincipal(identity);
+                var claimsIdentity = new ClaimsIdentity(claims, CookieAuthenticationDefaults.AuthenticationScheme);
+                var authProperties = new AuthenticationProperties { IsPersistent = true };
 
-                await HttpContext.SignInAsync(CookieAuthenticationDefaults.AuthenticationScheme, principal,
-                    new AuthenticationProperties { IsPersistent = false });
-                if (user.Username == "pascaladmin")
+                await HttpContext.SignInAsync(
+                    CookieAuthenticationDefaults.AuthenticationScheme,
+                    new ClaimsPrincipal(claimsIdentity),
+                    authProperties);
+                if (user.Username == "metaadmin")
                 {
-                    return RedirectToPage("/AdminDashboard");
+                    return RedirectToPage("/Admin");
                 }
                 return RedirectToPage("/Bingo");
             }
