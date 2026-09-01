@@ -53,7 +53,6 @@ namespace metalimes.Pages
                 Users newUser = new Users
                 {
                     Username = Username,
-                    Password = Password,
                     PasswordHash = new PasswordHasher<Users>().HashPassword(null, Password),
                     Role = Role,
                     CreatedAt = DateTime.UtcNow
