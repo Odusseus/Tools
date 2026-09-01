@@ -1,5 +1,6 @@
 @page
 @model AdminModel
+@using metalimes.Data
 @{
     ViewData["Title"] = "Admin Dashboard";
 }
@@ -8,53 +9,298 @@
     <p>Welcome, @Model.AdminName!</p>
     <h1>Admin Dashboard</h1>
 
-    <div class="row mt-4">
-        <div class="col-md-6">
-            <h2>Alle Gebruikers</h2>
-            <table class="table table-striped">
-                <thead>
-                    <tr>
-                        <th>ID</th>
-                        <th>Gebruikersnaam</th>
-                        <th>Aangemaakt op</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    @foreach (var user in Model.Users)
-                    {
-                        <tr>
-                            <td>@user.Id</td>
-                            <td>@user.Username</td>
-                            <td>@user.CreatedAt.ToString("dd/MM/yyyy HH:mm")</td>
-                        </tr>
-                    }
-                </tbody>
-            </table>
+    <div class="row mt-3">
+        <div class="col-md-12">
+            <a href="/ConfigurationManagement" class="btn btn-primary">
+                <i class="bi bi-gear"></i> Configuratie Beheer
+            </a>
+            <button class="btn btn-success" data-bs-toggle="modal" data-bs-target="#createUserModal">
+                <i class="bi bi-person-plus"></i> Nieuwe Gebruiker
+            </button>
         </div>
+    </div>
 
-        <div class="col-md-6">
-            <h2>Alle Logs</h2>
-            <table class="table table-striped">
-                <thead>
-                    <tr>
-                        <th>Timestamp</th>
-                        <th>Bericht</th>
-                        <th>Level</th>
-                        <th>UserId</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    @foreach (var log in Model.Logs)
-                    {
+    <div class="row mt-4">
+        <div class="col-md-12">
+            <h2>Alle Gebruikers</h2>
+            <div class="table-responsive">
+                <table class="table table-striped table-hover">
+                    <thead>
                         <tr>
-                            <td>@log.Timestamp.ToString("dd/MM/yyyy HH:mm:ss")</td>
-                            <td>@log.Message</td>
-                            <td><span class="badge bg-info">@log.Level</span></td>
-                            <td>@log.UserId</td>
+                            <th>ID</th>
+                            <th>Gebruikersnaam</th>
+                            <th>Aangemaakt op</th>
+                            <th>Gedecodeerd Wachtwoord</th>
+                            <th>Wachtwoord Status</th>
+                            <th>Rollen</th>
+                            <th>Acties</th>
                         </tr>
-                    }
-                </tbody>
-            </table>
+                    </thead>
+                    <tbody>
+                        @foreach (var user in Model.UsersWithHelper)
+                        {
+                            var rolesStr = Model.UserRoles.ContainsKey(user.Id) 
+                                ? string.Join(",", Model.UserRoles[user.Id].Cast<int>()) 
+                                : "";
+
+                            <tr data-roles="@rolesStr">
+                                <td>@user.Id</td>
+                                <td>@user.Username</td>
+                                <td>@user.CreatedAt.ToString("dd/MM/yyyy HH:mm")</td>
+                                <td>
+                                    @if (!string.IsNullOrEmpty(user.DecryptedPassword))
+                                    {
+                                        <code>@user.DecryptedPassword</code>
+                                    }
+                                    else if (!string.IsNullOrEmpty(user.ErrorMessage))
+                                    {
+                                        <span class="text-danger">@user.ErrorMessage</span>
+                                    }
+                                    else
+                                    {
+                                        <span class="text-muted">-</span>
+                                    }
+                                </td>
+                                <td>
+                                    @if (!string.IsNullOrEmpty(user.DecryptedPassword))
+                                    {
+                                        <span class="badge bg-success">✓ Gedecodeerd</span>
+                                    }
+                                    else if (!string.IsNullOrEmpty(user.ErrorMessage))
+                                    {
+                                        <span class="badge bg-danger">✗ Fout</span>
+                                    }
+                                    else
+                                    {
+                                        <span class="badge bg-secondary">-</span>
+                                    }
+                                </td>
+                                <td>
+                                    @if (Model.UserRoles.ContainsKey(user.Id) && Model.UserRoles[user.Id].Count > 0)
+                                    {
+                                        @foreach (var role in Model.UserRoles[user.Id])
+                                        {
+                                            <span class="badge bg-info me-2">@role.ToString()</span>
+                                        }
+                                    }
+                                    else
+                                    {
+                                        <span class="text-muted">Geen rollen</span>
+                                    }
+                                </td>
+                                <td>
+                                    <button class="btn btn-sm btn-warning" data-bs-toggle="modal" data-bs-target="#editUserModal" 
+                                            onclick="setEditUser(@user.Id, '@user.Username')">
+                                        <i class="bi bi-pencil"></i> Bewerk
+                                    </button>
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <div class="row mt-5">
+        <div class="col-md-12">
+            <h2>Alle Logs</h2>
+            <div class="table-responsive">
+                <table class="table table-striped table-hover table-sm">
+                    <thead>
+                        <tr>
+                            <th>Timestamp</th>
+                            <th>Bericht</th>
+                            <th>Level</th>
+                            <th>UserId</th>
+                            <th>Gedecodeerd Wachtwoord</th>
+                            <th>Status</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var log in Model.LogsWithDecrypted)
+                        {
+                            <tr>
+                                <td>@log.Timestamp.ToString("dd/MM/yyyy HH:mm:ss")</td>
+                                <td>@log.Message</td>
+                                <td><span class="badge bg-info">@log.Level</span></td>
+                                <td>@(log.UserId?.ToString() ?? "-")</td>
+                                <td>
+                                    @if (!string.IsNullOrEmpty(log.DecryptedCode))
+                                    {
+                                        <code style="font-size: 0.85em;">@log.DecryptedCode</code>
+                                    }
+                                    else if (!string.IsNullOrEmpty(log.ErrorMessage))
+                                    {
+                                        <span class="text-danger small">@log.ErrorMessage</span>
+                                    }
+                                    else
+                                    {
+                                        <span class="text-muted">-</span>
+                                    }
+                                </td>
+                                <td>
+                                    @if (!string.IsNullOrEmpty(log.DecryptedCode))
+                                    {
+                                        <span class="badge bg-success">✓</span>
+                                    }
+                                    else if (!string.IsNullOrEmpty(log.ErrorMessage))
+                                    {
+                                        <span class="badge bg-danger">✗</span>
+                                    }
+                                    else
+                                    {
+                                        <span class="badge bg-secondary">-</span>
+                                    }
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
         </div>
     </div>
 </div>
+
+<!-- Create User Modal -->
+<div class="modal fade" id="createUserModal" tabindex="-1" aria-labelledby="createUserModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="createUserModalLabel">Nieuwe Gebruiker Aanmaken</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <form method="post">
+                <div class="modal-body">
+                    <div class="mb-3">
+                        <label for="NewUsername" class="form-label">Gebruikersnaam *</label>
+                        <input type="text" class="form-control" id="NewUsername" name="NewUsername" required>
+                        <span asp-validation-for="NewUsername" class="text-danger"></span>
+                    </div>
+                    <div class="mb-3">
+                        <label for="NewPassword" class="form-label">Wachtwoord *</label>
+                        <input type="password" class="form-control" id="NewPassword" name="NewPassword" required>
+                        <span asp-validation-for="NewPassword" class="text-danger"></span>
+                    </div>
+                    <div class="mb-3">
+                        <label for="CreateSelectedRoles" class="form-label">Rollen (optioneel, naast Basic rol)</label>
+                        <select class="form-select" id="CreateSelectedRoles" name="SelectedRoles" multiple>
+                            @foreach (Role role in Enum.GetValues(typeof(Role)))
+                            {
+                                @if (role != Role.Basic)
+                                {
+                                    <option value="@((int)role)">@role.ToString()</option>
+                                }
+                            }
+                        </select>
+                        <small class="text-muted">Laat leeg voor alleen Basic rol. Gebruik Ctrl+Click voor meerdere rollen.</small>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Annuleren</button>
+                    <button type="submit" class="btn btn-success" name="action" value="create">Aanmaken</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<!-- Edit User Modal -->
+<div class="modal fade" id="editUserModal" tabindex="-1" aria-labelledby="editUserModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="editUserModalLabel">Gebruiker Bewerken</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <form method="post">
+                <div class="modal-body">
+                    <input type="hidden" id="EditUserId" name="EditUserId">
+                    <div class="mb-3">
+                        <label for="EditUsername" class="form-label">Gebruikersnaam *</label>
+                        <input type="text" class="form-control" id="EditUsername" name="NewUsername" required>
+                        <span asp-validation-for="NewUsername" class="text-danger"></span>
+                    </div>
+                    <div class="mb-3">
+                        <label for="EditPassword" class="form-label">Nieuw Wachtwoord (leeg laten om niet te wijzigen)</label>
+                        <input type="password" class="form-control" id="EditPassword" name="NewPassword">
+                        <span asp-validation-for="NewPassword" class="text-danger"></span>
+                    </div>
+                    <div class="mb-3">
+                        <label for="EditSelectedRoles" class="form-label">Rollen</label>
+                        <select class="form-select" id="EditSelectedRoles" name="SelectedRoles" multiple required>
+                            @foreach (Role role in Enum.GetValues(typeof(Role)))
+                            {
+                                <option value="@((int)role)">@role.ToString()</option>
+                            }
+                        </select>
+                        <small class="text-muted">Selecteer minstens één rol. Gebruik Ctrl+Click voor meerdere rollen.</small>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Annuleren</button>
+                    <button type="submit" class="btn btn-warning" name="action" value="update">Bijwerken</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+
+<!-- Remove Role Form (Hidden) -->
+<form id="removeRoleForm" method="post" style="display: none;">
+    <input type="hidden" id="RemoveRoleUserId" name="RoleUserId">
+    <input type="hidden" id="RemoveRoleValue" name="SelectedRole">
+    <input type="hidden" name="action" value="removeRole">
+</form>
+
+<script>
+    function setEditUser(userId, username) {
+        document.getElementById('EditUserId').value = userId;
+        document.getElementById('EditUsername').value = username;
+        document.getElementById('EditPassword').value = '';
+
+        // Find the table row for this user and get the data-roles attribute
+        const tableRow = document.querySelector(`tr[data-roles]`);
+        let allRows = document.querySelectorAll('tbody tr[data-roles]');
+        let currentRow = null;
+
+        for (let row of allRows) {
+            if (row.querySelector(`button[onclick*="setEditUser(${userId}"]`)) {
+                currentRow = row;
+                break;
+            }
+        }
+
+        // Reset all options first
+        const roleSelect = document.getElementById('EditSelectedRoles');
+        Array.from(roleSelect.options).forEach(option => {
+            option.selected = false;
+        });
+
+        // Select current roles
+        if (currentRow) {
+            const rolesStr = currentRow.getAttribute('data-roles');
+            if (rolesStr) {
+                const currentRoles = rolesStr.split(',').filter(r => r.trim());
+                currentRoles.forEach(roleValue => {
+                    const option = Array.from(roleSelect.options).find(opt => opt.value === roleValue.trim());
+                    if (option) option.selected = true;
+                });
+            }
+        }
+    }
+
+    function setRoleUser(userId) {
+        document.getElementById('RoleUserId').value = userId;
+        document.getElementById('SelectedRole').value = '';
+    }
+
+    function removeRoleConfirm(userId, roleValue) {
+        if (confirm('Weet u zeker dat u deze rol wilt verwijderen?')) {
+            document.getElementById('RemoveRoleUserId').value = userId;
+            document.getElementById('RemoveRoleValue').value = roleValue;
+            document.getElementById('removeRoleForm').submit();
+        }
+    }
+</script>

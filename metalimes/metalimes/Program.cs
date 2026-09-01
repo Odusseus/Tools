@@ -65,17 +65,17 @@ using (var scope = app.Services.CreateScope())
     db.Database.Migrate();   // maakt database + tabellen automatisch aan
 
     // Seed a default admin user if none exists (password = "password")
-    //if (!db.Users.Any())
+    //if (!db.User.Any())
     //{
-    //    var admin = new Users
+    //    var admin = new User
     //    {
     //        Username = "admin",
     //        Role = "admin",
     //        CreatedAt = DateTime.UtcNow
     //    };
-    //    var hasher = new PasswordHasher<Users>();
+    //    var hasher = new PasswordHasher<User>();
     //    admin.PasswordHash = hasher.HashPassword(admin, "password");
-    //    db.Users.Add(admin);
+    //    db.User.Add(admin);
     //    db.SaveChanges();
     //}
 }
