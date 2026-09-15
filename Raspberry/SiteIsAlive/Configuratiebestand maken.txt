@@ -1,0 +1,26 @@
+Configuratiebestand maken
+Voorbeeld met Gmail (maar werkt ook met Outlook, Ziggo, KPN, enz.):
+
+bash
+sudo nano /etc/msmtprc
+
+
+Maak een statusbestand
+bash
+touch /home/pascal/site.status
+
+Maak het script:
+nano /home/pi/checksite.sh
+
+
+Script uitvoerbaar maken:
+chmod +x /home/pascal/checksite.sh
+
+
+3. Cronjob instellen (bijv. elke minuut)
+bash
+crontab -e
+
+Cronjob (elke minuut)
+Code
+* * * * * /home/pi/checksite.sh >> /home/pi/sitecheck.log 2>&1

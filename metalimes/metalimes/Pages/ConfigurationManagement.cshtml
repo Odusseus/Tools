@@ -1,0 +1,210 @@
+@page
+@model ConfigurationManagementModel
+@using metalimes.Data
+@{
+    ViewData["Title"] = "Configuration Management";
+}
+
+<div class="container mt-5">
+    <div class="row mb-3">
+        <div class="col-md-12">
+            <a href="/Admin" class="btn btn-secondary">
+                <i class="bi bi-arrow-left"></i> Terug naar Admin
+            </a>
+        </div>
+    </div>
+
+    <h1>Configuration Management</h1>
+
+    <div class="row mt-4">
+        <div class="col-md-5">
+            <div class="card">
+                <div class="card-header bg-primary text-white">
+                    @if (Model.EditId.HasValue)
+                    {
+                        <h5 class="mb-0">Edit Configuration</h5>
+                    }
+                    else
+                    {
+                        <h5 class="mb-0">Create New Configuration</h5>
+                    }
+                </div>
+                <div class="card-body">
+                    <form method="post">
+                        @if (Model.EditId.HasValue)
+                        {
+                            <input type="hidden" asp-for="EditId" />
+                        }
+
+                        <div class="mb-3">
+                            <label for="Key" class="form-label">Key *</label>
+                            @if (Model.EditId.HasValue)
+                            {
+                                <select class="form-select" id="Key" asp-for="Key" asp-items="Html.GetEnumSelectList<ConfigKey>()" disabled>
+                                    <option value="">-- Select Configuration Key --</option>
+                                </select>
+                            }
+                            else
+                            {
+                                <select class="form-select" id="Key" asp-for="Key" asp-items="Html.GetEnumSelectList<ConfigKey>()">
+                                    <option value="">-- Select Configuration Key --</option>
+                                </select>
+                            }
+                            <span asp-validation-for="Key" class="text-danger"></span>
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="ValueType" class="form-label">Value Type *</label>
+                            <select class="form-select" id="ValueType" asp-for="ValueType" onchange="toggleValueFields()">
+                                <option value="String">String</option>
+                                <option value="Integer">Integer</option>
+                                <option value="DateTime">DateTime</option>
+                            </select>
+                        </div>
+
+                        <div class="mb-3" id="stringFieldContainer">
+                            <label for="StringValue" class="form-label">String Value</label>
+                            <input type="text" class="form-control" id="StringValue" asp-for="StringValue" />
+                            <span asp-validation-for="StringValue" class="text-danger"></span>
+                        </div>
+
+                        <div class="mb-3" id="integerFieldContainer" style="display: none;">
+                            <label for="IntegerValue" class="form-label">Integer Value</label>
+                            <input type="number" class="form-control" id="IntegerValue" asp-for="IntegerValue" />
+                            <span asp-validation-for="IntegerValue" class="text-danger"></span>
+                        </div>
+
+                        <div class="mb-3" id="datetimeFieldContainer" style="display: none;">
+                            <label for="DateTimeValue" class="form-label">DateTime Value</label>
+                            <input type="datetime-local" class="form-control" id="DateTimeValue" asp-for="DateTimeValue" />
+                            <span asp-validation-for="DateTimeValue" class="text-danger"></span>
+                        </div>
+
+                        <div class="d-grid gap-2 d-md-flex justify-content-md-between">
+                            @if (Model.EditId.HasValue)
+                            {
+                                <button type="submit" class="btn btn-warning" name="action" value="update">Update</button>
+                                <button type="submit" class="btn btn-danger" name="action" value="delete" onclick="return confirm('Are you sure you want to delete this configuration?');">Delete</button>
+                                <a href="@Url.Page("ConfigurationManagement")" class="btn btn-secondary">Cancel</a>
+                            }
+                            else
+                            {
+                                <button type="submit" class="btn btn-success" name="action" value="create">Create</button>
+                                <button type="reset" class="btn btn-outline-secondary">Clear</button>
+                            }
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-7">
+            <div class="card">
+                <div class="card-header bg-info text-white">
+                    <h5 class="mb-0">Configurations</h5>
+                </div>
+                <div class="card-body">
+                    @if (Model.Configurations.Count == 0)
+                    {
+                        <p class="text-muted">No configurations found.</p>
+                    }
+                    else
+                    {
+                        <div class="table-responsive">
+                            <table class="table table-striped table-hover">
+                                <thead>
+                                    <tr>
+                                        <th>Key</th>
+                                        <th>String Value</th>
+                                        <th>Integer Value</th>
+                                        <th>DateTime Value</th>
+                                        <th>Created At</th>
+                                        <th>Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @foreach (var config in Model.Configurations)
+                                    {
+                                        <tr>
+                                            <td>
+                                                <strong>@config.Key</strong>
+                                            </td>
+                                            <td>
+                                                @if (string.IsNullOrEmpty(config.StringValue))
+                                                {
+                                                    <span class="text-muted">-</span>
+                                                }
+                                                else
+                                                {
+                                                    @config.StringValue
+                                                }
+                                            </td>
+                                            <td>
+                                                @if (config.IntegerValue.HasValue)
+                                                {
+                                                    @config.IntegerValue
+                                                }
+                                                else
+                                                {
+                                                    <span class="text-muted">-</span>
+                                                }
+                                            </td>
+                                            <td>
+                                                @if (config.DateTimeValue.HasValue)
+                                                {
+                                                    @config.DateTimeValue.Value.ToString("dd/MM/yyyy HH:mm")
+                                                }
+                                                else
+                                                {
+                                                    <span class="text-muted">-</span>
+                                                }
+                                            </td>
+                                            <td>
+                                                @config.CreatedAt.ToString("dd/MM/yyyy HH:mm")
+                                            </td>
+                                            <td>
+                                                <a href="@Url.Page("ConfigurationManagement", new { id = config.Id })" class="btn btn-sm btn-primary">Edit</a>
+                                            </td>
+                                        </tr>
+                                    }
+                                </tbody>
+                            </table>
+                        </div>
+                    }
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    function toggleValueFields() {
+        const valueType = document.getElementById('ValueType').value;
+        const stringField = document.getElementById('stringFieldContainer');
+        const integerField = document.getElementById('integerFieldContainer');
+        const datetimeField = document.getElementById('datetimeFieldContainer');
+
+        // Hide all fields
+        stringField.style.display = 'none';
+        integerField.style.display = 'none';
+        datetimeField.style.display = 'none';
+
+        // Show selected field
+        if (valueType === 'String') {
+            stringField.style.display = 'block';
+        } else if (valueType === 'Integer') {
+            integerField.style.display = 'block';
+        } else if (valueType === 'DateTime') {
+            datetimeField.style.display = 'block';
+        }
+    }
+
+    // Initialize on page load
+    document.addEventListener('DOMContentLoaded', function () {
+        toggleValueFields();
+    });
+</script>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}
