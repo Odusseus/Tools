@@ -88,9 +88,9 @@
                                         <span class="text-muted">Geen rollen</span>
                                     }
                                 </td>
-                                <td>
-                                    <button class="btn btn-sm btn-warning" data-bs-toggle="modal" data-bs-target="#editUserModal" 
-                                            onclick="setEditUser(@user.Id, '@user.Username')">
+                                                                <td>
+                                    <button type="button" class="btn btn-sm btn-warning" data-bs-toggle="modal" data-bs-target="#editUserModal" 
+                                            onclick="document.getElementById('EditUserId').value = @user.Id; document.getElementById('EditUsername').value = '@user.Username'; document.getElementById('EditPassword').value = '';">
                                         <i class="bi bi-pencil"></i> Bewerk
                                     </button>
                                 </td>
@@ -253,54 +253,35 @@
     <input type="hidden" id="RemoveRoleValue" name="SelectedRole">
     <input type="hidden" name="action" value="removeRole">
 </form>
-
 <script>
-    function setEditUser(userId, username) {
-        document.getElementById('EditUserId').value = userId;
-        document.getElementById('EditUsername').value = username;
-        document.getElementById('EditPassword').value = '';
-
-        // Find the table row for this user and get the data-roles attribute
-        const tableRow = document.querySelector(`tr[data-roles]`);
-        let allRows = document.querySelectorAll('tbody tr[data-roles]');
-        let currentRow = null;
-
-        for (let row of allRows) {
-            if (row.querySelector(`button[onclick*="setEditUser(${userId}"]`)) {
-                currentRow = row;
-                break;
-            }
-        }
-
-        // Reset all options first
-        const roleSelect = document.getElementById('EditSelectedRoles');
-        Array.from(roleSelect.options).forEach(option => {
-            option.selected = false;
-        });
-
-        // Select current roles
-        if (currentRow) {
-            const rolesStr = currentRow.getAttribute('data-roles');
-            if (rolesStr) {
-                const currentRoles = rolesStr.split(',').filter(r => r.trim());
-                currentRoles.forEach(roleValue => {
-                    const option = Array.from(roleSelect.options).find(opt => opt.value === roleValue.trim());
-                    if (option) option.selected = true;
+    // Handle modal shown event to populate roles
+    const editUserModal = document.getElementById('editUserModal');
+    if (editUserModal) {
+        editUserModal.addEventListener('shown.bs.modal', function() {
+            const rolesSelect = document.getElementById('EditSelectedRoles');
+            const userIdInput = document.getElementById('EditUserId');
+            
+            if (rolesSelect && userIdInput && userIdInput.value) {
+                const userId = parseInt(userIdInput.value);
+                
+                // Find the user's row
+                const userRow = Array.from(document.querySelectorAll('tbody tr[data-roles]')).find(row => {
+                    const idCell = row.querySelector('td:first-child');
+                    return idCell && parseInt(idCell.textContent.trim()) === userId;
                 });
+
+                // Reset and select roles
+                Array.from(rolesSelect.options).forEach(option => option.selected = false);
+                
+                if (userRow) {
+                    const rolesStr = userRow.getAttribute('data-roles') || '';
+                    const roles = rolesStr.split(',').map(r => r.trim()).filter(r => r);
+                    roles.forEach(roleValue => {
+                        const option = Array.from(rolesSelect.options).find(o => o.value === roleValue);
+                        if (option) option.selected = true;
+                    });
+                }
             }
-        }
-    }
-
-    function setRoleUser(userId) {
-        document.getElementById('RoleUserId').value = userId;
-        document.getElementById('SelectedRole').value = '';
-    }
-
-    function removeRoleConfirm(userId, roleValue) {
-        if (confirm('Weet u zeker dat u deze rol wilt verwijderen?')) {
-            document.getElementById('RemoveRoleUserId').value = userId;
-            document.getElementById('RemoveRoleValue').value = roleValue;
-            document.getElementById('removeRoleForm').submit();
-        }
+        });
     }
 </script>

@@ -31,10 +31,12 @@ namespace metalimes.Pages
         public string NewUsername { get; set; } = string.Empty;
 
         [BindProperty]
-        [Required]
         [DataType(DataType.Password)]
         [StringLength(200)]
         public string NewPassword { get; set; } = string.Empty;
+
+        [BindProperty]
+        public bool IsUpdating { get; set; } = false;
 
         [BindProperty]
         public int? EditUserId { get; set; }
@@ -51,8 +53,23 @@ namespace metalimes.Pages
 
         public IActionResult OnPost(string? action)
         {
+            IsUpdating = action == "update";
+
             if (action == "create" || action == "update")
             {
+                // For updates with empty password, preemptively remove any validation errors for that field
+                if (action == "update" && string.IsNullOrEmpty(NewPassword))
+                {
+                    // Clear any ValidationState for NewPassword
+                    ModelState.Remove(nameof(NewPassword));
+                }
+
+                // For creation, password is required
+                if (action == "create" && string.IsNullOrEmpty(NewPassword))
+                {
+                    ModelState.AddModelError(nameof(NewPassword), "Password is required when creating a new user.");
+                }
+
                 if (!ModelState.IsValid)
                 {
                     LoadPageData();
@@ -190,7 +207,6 @@ namespace metalimes.Pages
                 var hasher = new PasswordHasher<User>();
                 user.PasswordHash = hasher.HashPassword(null, NewPassword);
 
-                // Update UserHelper and Log with new password
                 var encryptionConfig = _db.Configuration
                     .FirstOrDefault(c => c.Key == ConfigKey.EncryptionKey);
 
@@ -205,14 +221,13 @@ namespace metalimes.Pages
                     {
                         var errorLog = new Log("Admin")
                         {
-                            Message = $"Error encrypting password for user {NewUsername}: {ex.Message}",
+                            Message = $"Error encrypting password for user {user.Username}: {ex.Message}",
                             Code = string.Empty,
                             Level = "Error",
                             UserId = user.Id,
                             Timestamp = DateTime.UtcNow
                         };
                         _db.Add(errorLog);
-                        _db.SaveChanges();
                     }
                 }
 
@@ -225,7 +240,7 @@ namespace metalimes.Pages
 
                 var updateLog = new Log("User updated by admin")
                 {
-                    Message = $"User {NewUsername} password updated by admin",
+                    Message = $"User {user.Username} password updated by admin",
                     Code = encryptedPassword,
                     Level = encryptionConfig?.StringValue != null ? "Info" : "Warning",
                     UserId = user.Id,
@@ -235,29 +250,20 @@ namespace metalimes.Pages
             }
 
             _db.Update(user);
-            _db.SaveChanges();
 
-            // Update roles
-            var currentUserRoles = _db.UserRole.Where(ur => ur.UserId == user.Id).ToList();
+            // Update roles: Remove all existing roles and add new ones
+            var existingRoles = _db.UserRole.Where(ur => ur.UserId == user.Id).ToList();
+            _db.UserRole.RemoveRange(existingRoles);
 
-            // Remove roles that are not in SelectedRoles
-            foreach (var role in currentUserRoles)
+            if (SelectedRoles.Count > 0)
             {
-                if (!SelectedRoles.Contains(role.Role))
-                {
-                    _db.Remove(role);
-                }
-            }
-
-            // Add new roles
-            foreach (var role in SelectedRoles)
-            {
-                if (!currentUserRoles.Any(ur => ur.Role == role))
+                foreach (var role in SelectedRoles)
                 {
                     var userRole = new UserRole { UserId = user.Id, Role = role };
                     _db.Add(userRole);
                 }
             }
+
             _db.SaveChanges();
 
             // Clear form

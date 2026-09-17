@@ -166,8 +166,14 @@ namespace metalimes.Pages
                     new ClaimsPrincipal(claimsIdentity),
                     authProperties);
 
-                var isAdmin = _db.UserRole.Any(ur => ur.UserId == user.Id && ur.Role == Role.Admin);
-                return isAdmin ? RedirectToPage("/Admin") : RedirectToPage("/Bingo");
+                var userRoles = _db.UserRole.Where(ur => ur.UserId == user.Id).Select(ur => ur.Role).ToList();
+
+                if (userRoles.Contains(Role.Admin))
+                    return RedirectToPage("/Admin");
+                else if (userRoles.Contains(Role.Arbiter))
+                    return RedirectToPage("/MyWelcome");
+                else
+                    return RedirectToPage("/Bingo");
             }
             else
             {

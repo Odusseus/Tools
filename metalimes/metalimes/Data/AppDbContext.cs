@@ -16,6 +16,8 @@ namespace metalimes.Data
         public DbSet<UserRole> UserRole { get; set; }
         public DbSet<UserHelper> UserHelper { get; set; }
         public DbSet<Configuration> Configuration { get; set; }
+        public DbSet<Event> Event { get; set; }
+        public DbSet<Player> Player { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
@@ -52,6 +54,13 @@ namespace metalimes.Data
             modelBuilder.Entity<Configuration>()
                 .HasIndex(c => c.Key)
                 .IsUnique();
+
+            // Event -> Player: one-to-many (required), cascade delete
+            modelBuilder.Entity<Player>()
+                .HasOne(p => p.Event)
+                .WithMany(e => e.Players)
+                .HasForeignKey(p => p.EventId)
+                .OnDelete(DeleteBehavior.Cascade);
         }
     }
 }

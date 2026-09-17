@@ -1,0 +1,26 @@
+@page
+@model MyWelcomeModel
+@{
+    ViewData["Title"] = "My Welcome";
+}
+
+<div class="text-center">
+    <h1 class="display-4">Welcome, @User.Identity?.Name!</h1>
+    <p class="lead">You are now logged in.</p>
+</div>
+
+<div class="row mt-4">
+    <div class="col-md-8 offset-md-2">
+        <div class="card">
+            <div class="card-body">
+                <p>You can now access the application features.</p>
+                <div class="mb-3">
+                    <a asp-page="/Events" class="btn btn-primary">View My Events</a>
+                </div>
+                <form method="post" asp-page="/Logout" class="d-inline">
+                    <button type="submit" class="btn btn-danger">Logout</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
