@@ -44,6 +44,9 @@
                             <td>@evt.EndDate.ToString("dd/MM/yyyy HH:mm")</td>
                             <td>@evt.CreatedDate.ToString("dd/MM/yyyy HH:mm")</td>
                             <td>
+                                <a class="btn btn-sm btn-info" asp-page="/Players" asp-route-eventId="@evt.Id" title="View Players">
+                                    <i class="bi bi-people"></i> Players
+                                </a>
                                 <button type="button" class="btn btn-sm btn-warning" data-bs-toggle="modal" data-bs-target="#editEventModal" 
                                         onclick="setEditEvent(@evt.Id, '@evt.Name', '@evt.BeginDate.ToString("yyyy-MM-ddTHH:mm")', '@evt.EndDate.ToString("yyyy-MM-ddTHH:mm")')">
                                     <i class="bi bi-pencil"></i> Edit

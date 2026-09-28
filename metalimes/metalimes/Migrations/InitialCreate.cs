@@ -71,7 +71,10 @@ namespace metalimes.Data.Migrations
                     FirstName = table.Column<string>(type: "TEXT", nullable: false),
                     LastName = table.Column<string>(type: "TEXT", nullable: false),
                     Email = table.Column<string>(type: "TEXT", nullable: false),
+                    FideId = table.Column<string>(type: "TEXT", nullable: false),
+                    Rating = table.Column<int>(type: "INTEGER", nullable: false),
                     Status = table.Column<int>(type: "INTEGER", nullable: false),
+                    Timestamp = table.Column<DateTime>(type: "TEXT", nullable: false),
                     EventId = table.Column<int>(type: "INTEGER", nullable: false)
                 },
                 constraints: table =>
@@ -79,6 +82,32 @@ namespace metalimes.Data.Migrations
                     table.PrimaryKey("PK_Player", x => x.Id);
                     table.ForeignKey(
                         name: "FK_Player_Event_EventId",
+                        column: x => x.EventId,
+                        principalTable: "Event",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "PlayerPublic",
+                columns: table => new
+                {
+                    Id = table.Column<int>(type: "INTEGER", nullable: false)
+                        .Annotation("Sqlite:Autoincrement", true),
+                    FirstName = table.Column<string>(type: "TEXT", nullable: false),
+                    LastName = table.Column<string>(type: "TEXT", nullable: false),
+                    Email = table.Column<string>(type: "TEXT", nullable: false),
+                    FideId = table.Column<string>(type: "TEXT", nullable: false),
+                    Rating = table.Column<int>(type: "INTEGER", nullable: false),
+                    Status = table.Column<int>(type: "INTEGER", nullable: false, defaultValue: 0),
+                    Timestamp = table.Column<DateTime>(type: "TEXT", nullable: false),
+                    EventId = table.Column<int>(type: "INTEGER", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_PlayerPublic", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_PlayerPublic_Event_EventId",
                         column: x => x.EventId,
                         principalTable: "Event",
                         principalColumn: "Id",
@@ -151,25 +180,26 @@ namespace metalimes.Data.Migrations
                 unique: true);
 
             migrationBuilder.CreateIndex(
+                name: "IX_Log_UserId",
+                table: "Log",
+                column: "UserId");
+
+            migrationBuilder.CreateIndex(
                 name: "IX_Player_EventId",
                 table: "Player",
                 column: "EventId");
 
             migrationBuilder.CreateIndex(
-                name: "IX_Log_UserId",
-                table: "Log",
-                column: "UserId");
+                name: "IX_PlayerPublic_EventId_FirstName_LastName_FideId",
+                table: "PlayerPublic",
+                columns: new[] { "EventId", "FirstName", "LastName", "FideId" },
+                unique: true);
 
             migrationBuilder.CreateIndex(
                 name: "IX_User_Username",
                 table: "User",
                 column: "Username",
                 unique: true);
-
-            migrationBuilder.CreateIndex(
-                name: "IX_UserRole_UserId",
-                table: "UserRole",
-                column: "UserId");
         }
 
         protected override void Down(MigrationBuilder migrationBuilder)
@@ -185,6 +215,9 @@ namespace metalimes.Data.Migrations
 
             migrationBuilder.DropTable(
                 name: "Player");
+
+            migrationBuilder.DropTable(
+                name: "PlayerPublic");
 
             migrationBuilder.DropTable(
                 name: "Configuration");

@@ -10,6 +10,8 @@ namespace metalimes.Pages
         public int Id { get; set; }
         public string Username { get; set; } = string.Empty;
         public DateTime CreatedAt { get; set; }
+        public bool IsActive { get; set; }
+        public bool IsBlocked { get; set; }
         public string? DecryptedPassword { get; set; }
         public string? ErrorMessage { get; set; }
     }

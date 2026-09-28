@@ -114,6 +114,10 @@ namespace metalimes.Data.Migrations
                         .IsRequired()
                         .HasColumnType("TEXT");
 
+                    b.Property<string>("FideId")
+                        .IsRequired()
+                        .HasColumnType("TEXT");
+
                     b.Property<int>("EventId")
                         .HasColumnType("INTEGER");
 
@@ -125,14 +129,64 @@ namespace metalimes.Data.Migrations
                         .IsRequired()
                         .HasColumnType("TEXT");
 
+                    b.Property<int>("Rating")
+                        .HasColumnType("INTEGER");
+
                     b.Property<int>("Status")
                         .HasColumnType("INTEGER");
+
+                    b.Property<DateTime>("Timestamp")
+                        .HasColumnType("TEXT");
 
                     b.HasKey("Id");
 
                     b.HasIndex("EventId");
 
                     b.ToTable("Player");
+                });
+
+            modelBuilder.Entity("metalimes.Data.PlayerPublic", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("INTEGER");
+
+                    b.Property<string>("Email")
+                        .IsRequired()
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("FideId")
+                        .IsRequired()
+                        .HasColumnType("TEXT");
+
+                    b.Property<int>("EventId")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<string>("FirstName")
+                        .IsRequired()
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("LastName")
+                        .IsRequired()
+                        .HasColumnType("TEXT");
+
+                    b.Property<int>("Rating")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<int>("Status")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("INTEGER")
+                        .HasDefaultValue(0);
+
+                    b.Property<DateTime>("Timestamp")
+                        .HasColumnType("TEXT");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("EventId", "FirstName", "LastName", "FideId")
+                        .IsUnique();
+
+                    b.ToTable("PlayerPublic");
                 });
 
             modelBuilder.Entity("metalimes.Data.User", b =>
@@ -214,6 +268,17 @@ namespace metalimes.Data.Migrations
                     b.Navigation("Event");
                 });
 
+            modelBuilder.Entity("metalimes.Data.PlayerPublic", b =>
+                {
+                    b.HasOne("metalimes.Data.Event", "Event")
+                        .WithMany("PublicPlayers")
+                        .HasForeignKey("EventId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Event");
+                });
+
             modelBuilder.Entity("metalimes.Data.UserHelper", b =>
                 {
                     b.HasOne("metalimes.Data.User", "User")
@@ -239,6 +304,8 @@ namespace metalimes.Data.Migrations
             modelBuilder.Entity("metalimes.Data.Event", b =>
                 {
                     b.Navigation("Players");
+
+                    b.Navigation("PublicPlayers");
                 });
 
             modelBuilder.Entity("metalimes.Data.User", b =>

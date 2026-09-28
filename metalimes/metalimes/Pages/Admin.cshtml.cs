@@ -42,6 +42,12 @@ namespace metalimes.Pages
         public int? EditUserId { get; set; }
 
         [BindProperty]
+        public bool EditIsActive { get; set; }
+
+        [BindProperty]
+        public bool EditIsBlocked { get; set; }
+
+        [BindProperty]
         public List<Role> SelectedRoles { get; set; } = new();
 
         public void OnGet()
@@ -55,8 +61,57 @@ namespace metalimes.Pages
         {
             IsUpdating = action == "update";
 
+            // Ensure checkbox values are captured for update, even when form markup changes.
+            if (action == "update")
+            {
+                EditIsActive = Request.Form[nameof(EditIsActive)]
+                    .Any(v => string.Equals(v, "true", StringComparison.OrdinalIgnoreCase) ||
+                              string.Equals(v, "on", StringComparison.OrdinalIgnoreCase));
+                EditIsBlocked = Request.Form[nameof(EditIsBlocked)]
+                    .Any(v => string.Equals(v, "true", StringComparison.OrdinalIgnoreCase) ||
+                              string.Equals(v, "on", StringComparison.OrdinalIgnoreCase));
+
+                // Remove binder errors for checkbox "on" values since we parse them explicitly.
+                ModelState.Remove(nameof(EditIsActive));
+                ModelState.Remove(nameof(EditIsBlocked));
+            }
+
             if (action == "create" || action == "update")
             {
+                // Normalize role values from form (supports enum names and numeric values).
+                var selectedRoleRawValues = Request.Form[nameof(SelectedRoles)]
+                    .Concat(Request.Form["SelectedRoles[]"])
+                    .Where(v => !string.IsNullOrWhiteSpace(v))
+                    .Distinct(StringComparer.OrdinalIgnoreCase)
+                    .ToList();
+
+                var parsedRoles = new List<Role>();
+                foreach (var rawValue in selectedRoleRawValues)
+                {
+                    if (Enum.TryParse<Role>(rawValue, true, out var parsedRole))
+                    {
+                        parsedRoles.Add(parsedRole);
+                        continue;
+                    }
+
+                    if (int.TryParse(rawValue, out var roleInt) && Enum.IsDefined(typeof(Role), roleInt))
+                    {
+                        parsedRoles.Add((Role)roleInt);
+                    }
+                }
+
+                SelectedRoles = parsedRoles.Distinct().ToList();
+                ModelState.Remove(nameof(SelectedRoles));
+
+                // Business rule: Admin users must always be active and cannot be blocked.
+                if (action == "update" && SelectedRoles.Contains(Role.Admin))
+                {
+                    EditIsActive = true;
+                    EditIsBlocked = false;
+                    ModelState.Remove(nameof(EditIsActive));
+                    ModelState.Remove(nameof(EditIsBlocked));
+                }
+
                 // For updates with empty password, preemptively remove any validation errors for that field
                 if (action == "update" && string.IsNullOrEmpty(NewPassword))
                 {
@@ -192,6 +247,10 @@ namespace metalimes.Pages
                 return Page();
             }
 
+            // Allow status updates from edit popup
+            user.IsActive = EditIsActive;
+            user.IsBlocked = EditIsBlocked;
+
             // Check if new username is already taken by another user
             if (NewUsername != user.Username && _db.User.Any(u => u.Username == NewUsername))
             {
@@ -249,28 +308,69 @@ namespace metalimes.Pages
                 _db.Add(updateLog);
             }
 
-            _db.Update(user);
+            user.IsActive = EditIsActive;
+            user.IsBlocked = EditIsBlocked;
 
-            // Update roles: Remove all existing roles and add new ones
+            // Replace roles with current selection.
             var existingRoles = _db.UserRole.Where(ur => ur.UserId == user.Id).ToList();
-            _db.UserRole.RemoveRange(existingRoles);
-
-            if (SelectedRoles.Count > 0)
+            if (existingRoles.Count > 0)
             {
-                foreach (var role in SelectedRoles)
+                _db.UserRole.RemoveRange(existingRoles);
+            }
+
+            foreach (var role in SelectedRoles.Distinct())
+            {
+                _db.UserRole.Add(new UserRole
                 {
-                    var userRole = new UserRole { UserId = user.Id, Role = role };
-                    _db.Add(userRole);
-                }
+                    UserId = user.Id,
+                    Role = role
+                });
             }
 
             _db.SaveChanges();
+            return RedirectToPage();
+        }
 
-            // Clear form
-            NewUsername = string.Empty;
-            NewPassword = string.Empty;
-            EditUserId = null;
-            SelectedRoles.Clear();
+        public IActionResult OnPostDeleteUser(int id)
+        {
+            var user = _db.User.FirstOrDefault(u => u.Id == id);
+            if (user == null)
+            {
+                ModelState.AddModelError(string.Empty, "User not found.");
+                LoadPageData();
+                return Page();
+            }
+
+            if (user.IsActive)
+            {
+                ModelState.AddModelError(string.Empty, "Active users cannot be deleted.");
+                LoadPageData();
+                return Page();
+            }
+
+            var roles = _db.UserRole.Where(r => r.UserId == id).ToList();
+            if (roles.Count > 0)
+            {
+                _db.UserRole.RemoveRange(roles);
+            }
+
+            var helper = _db.UserHelper.FirstOrDefault(h => h.Id == id);
+            if (helper != null)
+            {
+                _db.UserHelper.Remove(helper);
+            }
+
+            var logs = _db.Log.Where(l => l.UserId == id).ToList();
+            if (logs.Count > 0)
+            {
+                foreach (var log in logs)
+                {
+                    log.UserId = null;
+                }
+            }
+
+            _db.User.Remove(user);
+            _db.SaveChanges();
 
             return RedirectToPage();
         }
@@ -281,8 +381,34 @@ namespace metalimes.Pages
             var encryptionConfig = _db.Configuration
                 .FirstOrDefault(c => c.Key == ConfigKey.EncryptionKey);
 
-            LoadUsersWithHelper(encryptionConfig);
-            LoadLogsWithDecrypted(encryptionConfig);
+            UsersWithHelper = _db.User
+                .OrderBy(u => u.Username)
+                .Select(u => new UserWithHelperViewModel
+                {
+                    Id = u.Id,
+                    Username = u.Username,
+                    CreatedAt = u.CreatedAt,
+                    DecryptedPassword = u.UserHelper.Password,
+                    ErrorMessage = (string)null!,
+                    IsActive = u.IsActive,
+                    IsBlocked = u.IsBlocked
+                })
+                .ToList();
+
+            LogsWithDecrypted = _db.Log
+                .OrderByDescending(l => l.Timestamp)
+                .Select(l => new LogWithDecryptedViewModel
+                {
+                    Id = l.Id,
+                    Timestamp = l.Timestamp,
+                    Message = l.Message,
+                    Level = l.Level,
+                    UserId = l.UserId,
+                    DecryptedCode = l.Code,
+                    ErrorMessage = (string)null!
+                })
+                .ToList();
+
             LoadUserRoles();
         }
 
@@ -299,87 +425,6 @@ namespace metalimes.Pages
                     .ToList();
 
                 UserRoles[user.Id] = roles;
-            }
-        }
-
-        private void LoadUsersWithHelper(Configuration? encryptionConfig)
-        {
-            var users = _db.User.ToList();
-
-            foreach (var user in users)
-            {
-                var userHelper = _db.UserHelper.FirstOrDefault(uh => uh.Id == user.Id);
-                string? decryptedPassword = null;
-                string? errorMessage = null;
-
-                if (userHelper?.Password != null)
-                {
-                    if (encryptionConfig?.StringValue != null)
-                    {
-                        try
-                        {
-                            decryptedPassword = EncryptionService.Decrypt(userHelper.Password, encryptionConfig.StringValue);
-                        }
-                        catch (Exception ex)
-                        {
-                            errorMessage = $"Failed to decrypt: {ex.Message}";
-                        }
-                    }
-                    else
-                    {
-                        errorMessage = "Encryption key not configured";
-                    }
-                }
-
-                UsersWithHelper.Add(new UserWithHelperViewModel
-                {
-                    Id = user.Id,
-                    Username = user.Username,
-                    CreatedAt = user.CreatedAt,
-                    DecryptedPassword = decryptedPassword,
-                    ErrorMessage = errorMessage
-                });
-            }
-        }
-
-        private void LoadLogsWithDecrypted(Configuration? encryptionConfig)
-        {
-            var logs = _db.Log.OrderByDescending(l => l.Timestamp).ToList();
-
-            foreach (var log in logs)
-            {
-                string? decryptedCode = null;
-                string? errorMessage = null;
-
-                if (!string.IsNullOrEmpty(log.Code))
-                {
-                    if (encryptionConfig?.StringValue != null)
-                    {
-                        try
-                        {
-                            decryptedCode = EncryptionService.Decrypt(log.Code, encryptionConfig.StringValue);
-                        }
-                        catch (Exception ex)
-                        {
-                            errorMessage = $"Failed to decrypt: {ex.Message}";
-                        }
-                    }
-                    else
-                    {
-                        errorMessage = "Encryption key not configured";
-                    }
-                }
-
-                LogsWithDecrypted.Add(new LogWithDecryptedViewModel
-                {
-                    Id = log.Id,
-                    Timestamp = log.Timestamp,
-                    Message = log.Message,
-                    Level = log.Level,
-                    UserId = log.UserId,
-                    DecryptedCode = decryptedCode,
-                    ErrorMessage = errorMessage
-                });
             }
         }
     }

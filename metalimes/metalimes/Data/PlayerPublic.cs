@@ -1,14 +1,6 @@
 namespace metalimes.Data
 {
-    public enum PlayerStatus
-    {
-        New = 0,
-        Confirmed = 1,
-        Cancelled = 2,
-        Imported = 3
-    }
-
-    public class Player
+    public class PlayerPublic
     {
         public int Id { get; set; }
         public string FirstName { get; set; } = string.Empty;
@@ -18,9 +10,8 @@ namespace metalimes.Data
         public int Rating { get; set; }
         public PlayerStatus Status { get; set; } = PlayerStatus.New;
         public DateTime Timestamp { get; set; } = DateTime.UtcNow;
-        public int EventId { get; set; } // Required foreign key
+        public int EventId { get; set; }
 
-        // Navigation property
         public Event? Event { get; set; }
     }
 }

@@ -105,7 +105,36 @@ namespace metalimes.Pages
                 _db.Add(userRole);
                 await _db.SaveChangesAsync();
 
-                ModelState.AddModelError(string.Empty, "Ongeldige gebruikersnaam of wachtwoord.");
+                ModelState.AddModelError(string.Empty, "Invalid username or password.");
+                return Page();
+            }
+
+            var isAdminUser = _db.UserRole.Any(ur => ur.UserId == user.Id && ur.Role == Role.Admin);
+
+            // Business rule: Admin users are always active and never blocked.
+            if (isAdminUser && (!user.IsActive || user.IsBlocked))
+            {
+                user.IsActive = true;
+                user.IsBlocked = false;
+                await _db.SaveChangesAsync();
+            }
+
+            // Only active and non-blocked non-admin users are allowed to sign in.
+            if (!isAdminUser && (!user.IsActive || user.IsBlocked))
+            {
+                var accessDeniedLog = new Log("Login")
+                {
+                    Message = $"Rejected login attempt for inactive/blocked user {Username}",
+                    Code = string.Empty,
+                    Level = "Warning",
+                    UserId = user.Id,
+                    Timestamp = DateTime.UtcNow
+                };
+
+                _db.Add(accessDeniedLog);
+                await _db.SaveChangesAsync();
+
+                ModelState.AddModelError(string.Empty, "Invalid username or password.");
                 return Page();
             }
 
@@ -210,7 +239,7 @@ namespace metalimes.Pages
                 await _db.SaveChangesAsync();
             }
 
-            ModelState.AddModelError(string.Empty, "Ongeldige gebruikersnaam of wachtwoord.");
+            ModelState.AddModelError(string.Empty, "Invalid username or password.");
             return Page();
         }
     }

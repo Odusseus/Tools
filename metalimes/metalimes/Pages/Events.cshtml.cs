@@ -91,7 +91,8 @@ namespace metalimes.Pages
         private void LoadUserEvents()
         {
             UserEvents = _db.Event
-                .OrderByDescending(e => e.BeginDate)
+                .OrderBy(e => e.BeginDate)
+                .ThenBy(e => e.Name)
                 .ToList();
         }
     }

@@ -1,0 +1,304 @@
+@page
+@model metalimes.Pages.PlayersModel
+@using metalimes.Data
+@{
+    ViewData["Title"] = "Players";
+}
+
+<div class="container mt-4">
+    <div class="d-flex justify-content-between align-items-center mb-3">
+        <h1 class="mb-0">Players</h1>
+        <a asp-page="/Events" class="btn btn-secondary">
+            <i class="bi bi-arrow-left"></i> Back to My Events
+        </a>
+    </div>
+
+    @if (Model.SelectedEvent == null)
+    {
+        <div class="alert alert-danger">Event not found.</div>
+    }
+    else
+    {
+        <div class="card mb-4">
+            <div class="card-body">
+                <h5 class="card-title mb-2">@Model.SelectedEvent.Name</h5>
+                <p class="mb-1"><strong>Begin:</strong> @Model.SelectedEvent.BeginDate.ToString("dd/MM/yyyy HH:mm")</p>
+                <p class="mb-0"><strong>End:</strong> @Model.SelectedEvent.EndDate.ToString("dd/MM/yyyy HH:mm")</p>
+            </div>
+        </div>
+
+        <div class="card mb-4">
+            <div class="card-header bg-primary text-white">Add Player</div>
+            <div class="card-body">
+                <form method="post" asp-page-handler="Create" asp-route-eventId="@Model.SelectedEvent.Id">
+                    <div asp-validation-summary="ModelOnly" class="text-danger mb-3"></div>
+                    <div class="row g-3">
+                        <div class="col-md-2">
+                            <label asp-for="NewPlayer.FirstName" class="form-label"></label>
+                            <input asp-for="NewPlayer.FirstName" class="form-control" />
+                            <span asp-validation-for="NewPlayer.FirstName" class="text-danger"></span>
+                        </div>
+                        <div class="col-md-2">
+                            <label asp-for="NewPlayer.LastName" class="form-label"></label>
+                            <input asp-for="NewPlayer.LastName" class="form-control" />
+                            <span asp-validation-for="NewPlayer.LastName" class="text-danger"></span>
+                        </div>
+                        <div class="col-md-3">
+                            <label asp-for="NewPlayer.Email" class="form-label"></label>
+                            <input asp-for="NewPlayer.Email" class="form-control" />
+                            <span asp-validation-for="NewPlayer.Email" class="text-danger"></span>
+                        </div>
+                        <div class="col-md-2">
+                            <label asp-for="NewPlayer.FideId" class="form-label">FideID</label>
+                            <input asp-for="NewPlayer.FideId" class="form-control" />
+                            <span asp-validation-for="NewPlayer.FideId" class="text-danger"></span>
+                        </div>
+                        <div class="col-md-1">
+                            <label asp-for="NewPlayer.Rating" class="form-label"></label>
+                            <input asp-for="NewPlayer.Rating" class="form-control" type="number" min="0" max="4000" />
+                            <span asp-validation-for="NewPlayer.Rating" class="text-danger"></span>
+                        </div>
+                        <div class="col-md-2">
+                            <label asp-for="NewPlayer.Status" class="form-label"></label>
+                            <select asp-for="NewPlayer.Status" class="form-select" asp-items="Html.GetEnumSelectList<PlayerStatus>()"></select>
+                        </div>
+                    </div>
+                    <div class="mt-3">
+                        <button type="submit" class="btn btn-success">
+                            <i class="bi bi-plus-circle"></i> Add Player
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <div class="card mb-4">
+            <div class="card-header bg-dark text-white">Player List</div>
+            <div class="card-body">
+                @if (Model.Players.Count == 0)
+                {
+                    <div class="alert alert-info mb-0">No players found for this event.</div>
+                }
+                else
+                {
+                    <div class="table-responsive">
+                        <table class="table table-striped table-hover align-middle">
+                            <thead>
+                                <tr>
+                                    <th>First Name</th>
+                                    <th>Last Name</th>
+                                    <th>Email</th>
+                                    <th>FideID</th>
+                                    <th>Rating</th>
+                                    <th>Status</th>
+                                    <th style="width: 190px;">Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @foreach (var player in Model.Players)
+                                {
+                                    <tr>
+                                        <td>@player.FirstName</td>
+                                        <td>@player.LastName</td>
+                                        <td>@player.Email</td>
+                                        <td>@player.FideId</td>
+                                        <td>@player.Rating</td>
+                                        <td>
+                                            @if (player.Status == PlayerStatus.Confirmed)
+                                            {
+                                                <span class="badge bg-success">Confirmed</span>
+                                            }
+                                            else if (player.Status == PlayerStatus.Cancelled)
+                                            {
+                                                <span class="badge bg-danger">Cancelled</span>
+                                            }
+                                            else if (player.Status == PlayerStatus.Imported)
+                                            {
+                                                <span class="badge bg-info">Imported</span>
+                                            }
+                                            else
+                                            {
+                                                <span class="badge bg-secondary">New</span>
+                                            }
+                                        </td>
+                                        <td>
+                                            <button type="button"
+                                                    class="btn btn-sm btn-warning"
+                                                    data-bs-toggle="modal"
+                                                    data-bs-target="#editPlayerModal"
+                                                    data-player-id="@player.Id"
+                                                    data-first-name="@player.FirstName"
+                                                    data-last-name="@player.LastName"
+                                                    data-email="@player.Email"
+                                                    data-fide-id="@player.FideId"
+                                                    data-status="@player.Status"
+                                                    data-rating="@player.Rating"
+                                                    data-status="@player.Status">
+                                                <i class="bi bi-pencil"></i> Edit
+                                            </button>
+                                            <form method="post" asp-page-handler="Delete" asp-route-eventId="@Model.SelectedEvent.Id" asp-route-id="@player.Id" class="d-inline"
+                                                  onsubmit="return confirm('Delete this player?');">
+                                                <button type="submit" class="btn btn-sm btn-danger">
+                                                    <i class="bi bi-trash"></i> Delete
+                                                </button>
+                                            </form>
+                                        </td>
+                                    </tr>
+                                }
+                            </tbody>
+                        </table>
+                    </div>
+                }
+            </div>
+        </div>
+
+        <div class="card mb-4">
+            <div class="card-header bg-secondary text-white">PlayerPublic List</div>
+            <div class="card-body">
+                @if (Model.PublicPlayers.Count == 0)
+                {
+                    <div class="alert alert-info mb-0">No public players found for this event.</div>
+                }
+                else
+                {
+                    <div class="table-responsive">
+                        <table class="table table-striped table-hover align-middle">
+                            <thead>
+                                <tr>
+                                    <th>First Name</th>
+                                    <th>Last Name</th>
+                                    <th>Email</th>
+                                    <th>FideID</th>
+                                    <th>Rating</th>
+                                    <th>Status</th>
+                                    <th style="width: 150px;">Action</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @foreach (var publicPlayer in Model.PublicPlayers)
+                                {
+                                    <tr>
+                                        <td>@publicPlayer.FirstName</td>
+                                        <td>@publicPlayer.LastName</td>
+                                        <td>@publicPlayer.Email</td>
+                                        <td>@publicPlayer.FideId</td>
+                                        <td>@publicPlayer.Rating</td>
+                                        <td>
+                                            @if (publicPlayer.Status == PlayerStatus.Confirmed)
+                                            {
+                                                <span class="badge bg-success">Confirmed</span>
+                                            }
+                                            else if (publicPlayer.Status == PlayerStatus.Cancelled)
+                                            {
+                                                <span class="badge bg-danger">Cancelled</span>
+                                            }
+                                            else if (publicPlayer.Status == PlayerStatus.Imported)
+                                            {
+                                                <span class="badge bg-info">Imported</span>
+                                            }
+                                            else
+                                            {
+                                                <span class="badge bg-secondary">New</span>
+                                            }
+                                        </td>
+                                        <td>
+                                            @if (publicPlayer.Status == PlayerStatus.Imported)
+                                            {
+                                                <button type="button" class="btn btn-sm btn-outline-secondary" disabled>Imported</button>
+                                            }
+                                            else
+                                            {
+                                                <form method="post" asp-page-handler="ImportPublic" asp-route-eventId="@Model.SelectedEvent.Id" class="d-inline">
+                                                    <input type="hidden" name="publicId" value="@publicPlayer.Id" />
+                                                    <button type="submit" class="btn btn-sm btn-primary">Import</button>
+                                                </form>
+                                            }
+                                        </td>
+                                    </tr>
+                                }
+                            </tbody>
+                        </table>
+                    </div>
+                }
+            </div>
+        </div>
+
+        <div class="modal fade" id="editPlayerModal" tabindex="-1" aria-labelledby="editPlayerModalLabel" aria-hidden="true">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="editPlayerModalLabel">Edit Player</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <form method="post" asp-page-handler="Edit" asp-route-eventId="@Model.SelectedEvent?.Id">
+                        <div class="modal-body">
+                            <div asp-validation-summary="ModelOnly" class="text-danger mb-3"></div>
+
+                            <input asp-for="EditPlayer.Id" type="hidden" id="editPlayerId" />
+
+                            <div class="mb-3">
+                                <label asp-for="EditPlayer.FirstName" class="form-label"></label>
+                                <input asp-for="EditPlayer.FirstName" class="form-control" id="editPlayerFirstName" />
+                                <span asp-validation-for="EditPlayer.FirstName" class="text-danger"></span>
+                            </div>
+
+                            <div class="mb-3">
+                                <label asp-for="EditPlayer.LastName" class="form-label"></label>
+                                <input asp-for="EditPlayer.LastName" class="form-control" id="editPlayerLastName" />
+                                <span asp-validation-for="EditPlayer.LastName" class="text-danger"></span>
+                            </div>
+
+                            <div class="mb-3">
+                                <label asp-for="EditPlayer.Email" class="form-label"></label>
+                                <input asp-for="EditPlayer.Email" class="form-control" id="editPlayerEmail" />
+                                <span asp-validation-for="EditPlayer.Email" class="text-danger"></span>
+                            </div>
+
+                            <div class="mb-3">
+                                <label asp-for="EditPlayer.FideId" class="form-label">FideID</label>
+                                <input asp-for="EditPlayer.FideId" class="form-control" id="editPlayerFideId" />
+                                <span asp-validation-for="EditPlayer.FideId" class="text-danger"></span>
+                            </div>
+
+                            <div class="mb-3">
+                                <label asp-for="EditPlayer.Rating" class="form-label"></label>
+                                <input asp-for="EditPlayer.Rating" class="form-control" id="editPlayerRating" type="number" min="0" max="4000" />
+                                <span asp-validation-for="EditPlayer.Rating" class="text-danger"></span>
+                            </div>
+
+                            <div class="mb-3">
+                                <label asp-for="EditPlayer.Status" class="form-label"></label>
+                                <select asp-for="EditPlayer.Status" class="form-select" id="editPlayerStatus" asp-items="Html.GetEnumSelectList<PlayerStatus>()"></select>
+                            </div>
+                        </div>
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                            <button type="submit" class="btn btn-primary">Save Changes</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    }
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+    <script>
+        const editPlayerModal = document.getElementById('editPlayerModal');
+        if (editPlayerModal) {
+            editPlayerModal.addEventListener('show.bs.modal', function (event) {
+                const button = event.relatedTarget;
+                if (!button) return;
+
+                document.getElementById('editPlayerId').value = button.getAttribute('data-player-id') || '';
+                document.getElementById('editPlayerFirstName').value = button.getAttribute('data-first-name') || '';
+                document.getElementById('editPlayerLastName').value = button.getAttribute('data-last-name') || '';
+                document.getElementById('editPlayerEmail').value = button.getAttribute('data-email') || '';
+                document.getElementById('editPlayerFideId').value = button.getAttribute('data-fide-id') || '';
+                document.getElementById('editPlayerRating').value = button.getAttribute('data-rating') || '0';
+                document.getElementById('editPlayerStatus').value = button.getAttribute('data-status') || 'New';
+            });
+        }
+    </script>
+}

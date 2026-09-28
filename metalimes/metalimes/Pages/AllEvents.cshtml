@@ -1,0 +1,75 @@
+@page
+@model metalimes.Pages.AllEventsModel
+@{
+    ViewData["Title"] = "All Events";
+}
+
+<div class="container mt-4">
+    <div class="d-flex justify-content-between align-items-center mb-3">
+        <h1 class="mb-0">All Events</h1>
+        <a asp-page="/Index" class="btn btn-secondary">
+            <i class="bi bi-arrow-left"></i> Back to Home
+        </a>
+    </div>
+
+    <div class="card mb-4">
+        <div class="card-header bg-dark text-white">Filters</div>
+        <div class="card-body">
+            <form method="get" class="row g-3 align-items-end">
+                <div class="col-md-3">
+                    <label asp-for="BeginDateFilter" class="form-label">Begin Date (from)</label>
+                    <input asp-for="BeginDateFilter" type="date" class="form-control" />
+                </div>
+                <div class="col-md-3">
+                    <label asp-for="EndDateFilter" class="form-label">End Date (until)</label>
+                    <input asp-for="EndDateFilter" type="date" class="form-control" />
+                </div>
+                <div class="col-md-4">
+                    <label asp-for="NameFilter" class="form-label">Name contains</label>
+                    <input asp-for="NameFilter" class="form-control" placeholder="Part of event name" />
+                </div>
+                <div class="col-md-2 d-flex gap-2">
+                    <button type="submit" class="btn btn-primary w-100">Filter</button>
+                    <a asp-page="/AllEvents" class="btn btn-outline-secondary w-100">Reset</a>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    @if (Model.Events.Count == 0)
+    {
+        <div class="alert alert-info mb-0">No events found for the selected filters.</div>
+    }
+    else
+    {
+        <div class="table-responsive">
+            <table class="table table-striped table-hover align-middle">
+                <thead class="table-dark">
+                    <tr>
+                        <th>Name</th>
+                        <th>Begin Date</th>
+                        <th>End Date</th>
+                        <th>Created Date</th>
+                        <th style="width: 120px;">Players</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var evt in Model.Events)
+                    {
+                        <tr>
+                            <td><strong>@evt.Name</strong></td>
+                            <td>@evt.BeginDate.ToString("dd/MM/yyyy HH:mm")</td>
+                            <td>@evt.EndDate.ToString("dd/MM/yyyy HH:mm")</td>
+                            <td>@evt.CreatedDate.ToString("dd/MM/yyyy HH:mm")</td>
+                            <td>
+                                <a class="btn btn-sm btn-info" href="/PlayersPublic?eventId=@evt.Id">
+                                    <i class="bi bi-people"></i> Players
+                                </a>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    }
+</div>

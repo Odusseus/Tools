@@ -1,0 +1,176 @@
+@page "/PlayersPublic"
+@model metalimes.Pages.PublicPlayersModel
+@using metalimes.Data
+@{
+    ViewData["Title"] = "Players";
+}
+
+<div class="container mt-4">
+    <div class="d-flex justify-content-between align-items-center mb-3">
+        <h1 class="mb-0">Players</h1>
+        <a asp-page="/AllEvents" class="btn btn-secondary">
+            <i class="bi bi-arrow-left"></i> Back to All Events
+        </a>
+    </div>
+
+    @if (Model.SelectedEvent == null)
+    {
+        <div class="alert alert-danger">Event not found.</div>
+    }
+    else
+    {
+        <div class="card mb-4">
+            <div class="card-body">
+                <h5 class="card-title mb-2">@Model.SelectedEvent.Name</h5>
+                <p class="mb-1"><strong>Begin:</strong> @Model.SelectedEvent.BeginDate.ToString("dd/MM/yyyy HH:mm")</p>
+                <p class="mb-0"><strong>End:</strong> @Model.SelectedEvent.EndDate.ToString("dd/MM/yyyy HH:mm")</p>
+            </div>
+        </div>
+
+        @if (Model.Players.Count == 0)
+        {
+            <div class="alert alert-info mb-4">No players found for this event.</div>
+        }
+        else
+        {
+            <div class="table-responsive mb-4">
+                <table class="table table-striped table-hover align-middle">
+                    <thead class="table-dark">
+                        <tr>
+                            <th>First Name</th>
+                            <th>Last Name</th>
+                            <th>Email</th>
+                            <th>FideID</th>
+                            <th>Rating</th>
+                            <th>Status</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var player in Model.Players)
+                        {
+                            <tr>
+                                <td>@player.FirstName</td>
+                                <td>@player.LastName</td>
+                                <td>@player.Email</td>
+                                <td>@player.FideId</td>
+                                <td>@player.Rating</td>
+                                <td>
+                                    @if (player.Status == PlayerStatus.Confirmed)
+                                    {
+                                        <span class="badge bg-success">Confirmed</span>
+                                    }
+                                    else if (player.Status == PlayerStatus.Cancelled)
+                                    {
+                                        <span class="badge bg-danger">Cancelled</span>
+                                    }
+                                    else
+                                    {
+                                        <span class="badge bg-secondary">New</span>
+                                    }
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        }
+
+        <div class="card mb-4">
+            <div class="card-header bg-primary text-white">Register as Player</div>
+            <div class="card-body">
+                <form method="post" asp-page-handler="Create" asp-route-eventId="@Model.SelectedEvent.Id">
+                    <div asp-validation-summary="ModelOnly" class="text-danger mb-3"></div>
+                    <div class="row g-3">
+                        <div class="col-md-3">
+                            <label asp-for="NewPlayerPublic.FirstName" class="form-label"></label>
+                            <input asp-for="NewPlayerPublic.FirstName" class="form-control" />
+                            <span asp-validation-for="NewPlayerPublic.FirstName" class="text-danger"></span>
+                        </div>
+                        <div class="col-md-3">
+                            <label asp-for="NewPlayerPublic.LastName" class="form-label"></label>
+                            <input asp-for="NewPlayerPublic.LastName" class="form-control" />
+                            <span asp-validation-for="NewPlayerPublic.LastName" class="text-danger"></span>
+                        </div>
+                        <div class="col-md-3">
+                            <label asp-for="NewPlayerPublic.Email" class="form-label"></label>
+                            <input asp-for="NewPlayerPublic.Email" class="form-control" />
+                            <span asp-validation-for="NewPlayerPublic.Email" class="text-danger"></span>
+                        </div>
+                        <div class="col-md-2">
+                            <label asp-for="NewPlayerPublic.FideId" class="form-label">FideID</label>
+                            <input asp-for="NewPlayerPublic.FideId" class="form-control" />
+                            <span asp-validation-for="NewPlayerPublic.FideId" class="text-danger"></span>
+                        </div>
+                        <div class="col-md-1">
+                            <label asp-for="NewPlayerPublic.Rating" class="form-label"></label>
+                            <input asp-for="NewPlayerPublic.Rating" class="form-control" type="number" min="0" max="4000" />
+                            <span asp-validation-for="NewPlayerPublic.Rating" class="text-danger"></span>
+                        </div>
+                    </div>
+                    <div class="mt-3">
+                        <button type="submit" class="btn btn-success">
+                            <i class="bi bi-plus-circle"></i> Add Public Player
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <div class="card mt-4">
+            <div class="card-header bg-dark text-white">Public Player List</div>
+            <div class="card-body">
+                @if (Model.PublicPlayers.Count == 0)
+                {
+                    <div class="alert alert-info mb-0">No public players found for this event.</div>
+                }
+                else
+                {
+                    <div class="table-responsive">
+                        <table class="table table-striped table-hover align-middle">
+                            <thead>
+                                <tr>
+                                    <th>First Name</th>
+                                    <th>Last Name</th>
+                                    <th>Email</th>
+                                    <th>FideID</th>
+                                    <th>Rating</th>
+                                    <th>Status</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @foreach (var player in Model.PublicPlayers)
+                                {
+                                    <tr>
+                                        <td>@player.FirstName</td>
+                                        <td>@player.LastName</td>
+                                        <td>@player.Email</td>
+                                        <td>@player.FideId</td>
+                                        <td>@player.Rating</td>
+                                        <td>
+                                            @if (player.Status == PlayerStatus.Confirmed)
+                                            {
+                                                <span class="badge bg-success">Confirmed</span>
+                                            }
+                                            else if (player.Status == PlayerStatus.Cancelled)
+                                            {
+                                                <span class="badge bg-danger">Cancelled</span>
+                                            }
+                                            else
+                                            {
+                                                <span class="badge bg-secondary">New</span>
+                                            }
+                                        </td>
+                                    </tr>
+                                }
+                            </tbody>
+                        </table>
+                    </div>
+                }
+            </div>
+        </div>
+    }
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}

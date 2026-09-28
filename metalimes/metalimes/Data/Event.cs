@@ -10,5 +10,6 @@ namespace metalimes.Data
 
         // Navigation property for players
         public ICollection<Player>? Players { get; set; }
+        public ICollection<PlayerPublic>? PublicPlayers { get; set; }
     }
 }

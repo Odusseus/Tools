@@ -1,16 +1,73 @@
 # Metalimes - Razor Pages Application
 
+## 🗺️ Sitemap
+
+| Page | Route | Description | Authorization |
+|--------|-------|-------------|-------------|
+| **Login** | `/Login` | Login page with username/password | Anonymous |
+| **Index** | `/` or `/Index` | Landing page after login | Authenticated |
+| **Bingo** | `/Bingo` | Bingo game page | Authenticated |
+| **Events** | `/Events` | Event management | Authenticated |
+| **Players** | `/Players?eventId={id}` | Player management per event (CRUD) | Authenticated |
+| **Public Players** | `/PlayersPublic?eventId={id}` | Public event player view + public registration | Public |
+| **All Events** | `/AllEvents` | Public event overview | Public |
+| **My Welcome** | `/MyWelcome` | Welcome page for user | Authenticated |
+| **Privacy** | `/Privacy` | Privacy page | Public |
+| **Logout** | `/Logout` | Logout handler (POST) | Authenticated |
+| **Admin Dashboard** | `/Admin` | Admin user management & logs | Admin only |
+| **Configuration Management** | `/ConfigurationManagement` | System configuration management | Admin only |
+| **Error** | `/Error` | Error page | Always reachable |
+
+### Page Details
+
+#### Public Pages
+- **Login** (`/Login`): Login form for users
+- **Privacy** (`/Privacy`): Privacy policy
+- **All Events** (`/AllEvents`): Public list of events
+- **Public Players** (`/PlayersPublic?eventId={id}`):
+  - Public event player list
+  - Public registration to `PlayerPublic`
+
+#### Authenticated Pages
+- **Index** (`/`): Home page with welcome message
+- **Bingo** (`/Bingo`): Bingo game interface
+- **Events** (`/Events`): Event overview and management
+- **Players** (`/Players?eventId={id}`):
+  - Add, edit, and delete players within an event
+  - View `PlayerPublic` records for the same event
+  - Import `PlayerPublic` one-by-one into `Player`
+  - Imported public records are marked with status `Imported`
+- **My Welcome** (`/MyWelcome`): Personal welcome page
+- **Logout** (`/Logout`): Logout processing (POST-only)
+
+#### Admin Pages (Admin role only)
+- **Admin Dashboard** (`/Admin`): 
+  - User management (create, read, update, delete)
+  - Logs viewer
+  - Role assignment
+- **Configuration Management** (`/ConfigurationManagement`):
+  - Manage system configurations
+  - Encryption key management
+  - Application settings
+
+#### Error Handling
+- **Error** (`/Error`): Central error handling page
+
+---
+
 ## 📊 Datamodel
 
 ```mermaid
 erDiagram
     USER ||--o{ LOG : creates
     EVENT ||--o{ PLAYER : contains
+    EVENT ||--o{ PLAYERPUBLIC : contains
+    USER ||--o{ USERROLE : has
 
     USER {
         int Id PK
         string Username UK "unieke gebruikersnaam"
-        string PasswordHash "gehashed wachtwoord"
+        string PasswordHash "hashed password"
         datetime CreatedAt
         bool IsActive "default: true"
         bool IsBlocked "default: false"
@@ -41,8 +98,8 @@ erDiagram
         datetime Timestamp
         string Message
         string Level "Info, Warning, Error, etc"
-        string Code "optioneel: encrypted password of andere gevoelige data"
-        int UserId FK "optioneel"
+        string Code "optional: encrypted password or other sensitive data"
+        int UserId FK "optional"
     }
 
     EVENT {
@@ -57,60 +114,141 @@ erDiagram
         int Id PK
         string FirstName
         string LastName
-        string Email
-        string Status "enum: New (0), Confirmed (1)"
-        int EventId FK "verplicht"
+        string Email "optional"
+        string FideId "optional"
+        int Rating
+        string Status "enum: New (0), Confirmed (1), Cancelled (2), Imported (3)"
+        datetime Timestamp "player record timestamp (UTC)"
+        int EventId FK "required"
+    }
+
+    PLAYERPUBLIC {
+        int Id PK
+        string FirstName
+        string LastName
+        string Email "optional"
+        string FideId "optional"
+        int Rating
+        string Status "enum: New (0), Confirmed (1), Cancelled (2), Imported (3)"
+        datetime Timestamp
+        int EventId FK "required"
     }
 ```
 
-## 🔑 Database Relaties
+## 🔑 Database Relationships
 
 | Entity | Type | Beschrijving |
 |--------|------|-------------|
-| **User** | Entity | Gebruikersaccounts met authenticatie |
-| **UserRole** | Mapping | Toewijzing van 1 rol per rij; 1 user kan meerdere rollen hebben |
-| **Log** | Entity | Audit logs gekoppeld aan gebruikers |
-| **Event** | Entity | Evenementen waar spelers zich kunnen registreren |
-| **Player** | Entity | Deelnemers van een event |
+| **User** | Entity | User accounts with authentication |
+| **UserRole** | Mapping | One role per row; one user can have multiple roles |
+| **Log** | Entity | Audit logs linked to users |
+| **Event** | Entity | Events where players can register |
+| **Player** | Entity | Participants of an event |
+| **PlayerPublic** | Entity | Public registrations per event |
 
-### User Tabel
-- **Id**: Primaire sleutel
-- **Username**: Unieke gebruikersnaam (index)
-- **Password**: Ongeëncrypteerd wachtwoord (optioneel)
-- **PasswordHash**: BCrypt gehashed wachtwoord
-- **CreatedAt**: Aanmaakdatum (UTC)
-- **IsActive**: Boolean, standaard `true`
-- **IsBlocked**: Boolean, standaard `false`
+### User Table
+- **Id**: Primary key
+- **Username**: Unique username (index)
+- **Password**: Unencrypted password (optional)
+- **PasswordHash**: BCrypt hashed password
+- **CreatedAt**: Creation date (UTC)
+- **IsActive**: Boolean, default `true`
+- **IsBlocked**: Boolean, default `false`
 
-> Rollen worden opgeslagen in de UserRole tabel (1 rij per toegewezen rol).
+> Roles are stored in the UserRole table (1 row per assigned role).
 
-### Configuration Tabel
-- **Id**: Primaire sleutel
-- **Key**: Unieke configuratiesleutel (index) - enum waarde (bv. EncryptionKey)
-- **ValueType**: Type van de configuratiewaarde - "String", "Integer", of "DateTime"
-- **StringValue**: Tekenreeks waarde (optioneel, gebruikt als ValueType = "String")
-- **IntegerValue**: Geheel getal waarde (optioneel, gebruikt als ValueType = "Integer")
-- **DateTimeValue**: Datum/tijd waarde (optioneel, gebruikt als ValueType = "DateTime")
-- **CreatedAt**: Aanmaakdatum (UTC, standaard: CURRENT_TIMESTAMP)
+### Configuration Table
+- **Id**: Primary key
+- **Key**: Unique configuration key (index) - enum value (e.g., EncryptionKey)
+- **ValueType**: Type of configuration value - "String", "Integer", or "DateTime"
+- **StringValue**: String value (optional, used when ValueType = "String")
+- **IntegerValue**: Integer value (optional, used when ValueType = "Integer")
+- **DateTimeValue**: Date/time value (optional, used when ValueType = "DateTime")
+- **CreatedAt**: Creation date (UTC, default: CURRENT_TIMESTAMP)
 
-> **Opmerking**: Slechts één waarde (StringValue, IntegerValue, of DateTimeValue) moet ingevuld zijn, afhankelijk van ValueType.
+> **Note**: Only one value (StringValue, IntegerValue, or DateTimeValue) should be set, depending on ValueType.
 
-### Events Tabel
-- **Id**: Primaire sleutel
-- **Name**: Naam van het event
-- **CreatedDate**: Datum waarop het event is aangemaakt
-- **BeginDate**: Startdatum van het event
-- **EndDate**: Einddatum van het event
-- **Players**: 0 of meer deelnemers (navigatie)
+### Events Table
+- **Id**: Primary key
+- **Name**: Event name
+- **CreatedDate**: Date when event was created
+- **BeginDate**: Event start date
+- **EndDate**: Event end date
+- **Players**: 0 or more participants (navigation)
 
-### Players Tabel
-- **Id**: Primaire sleutel
-- **FirstName**: Voornaam van de deelnemer
-- **LastName**: Achternaam van de deelnemer
-- **Email**: E-mailadres van de deelnemer
-- **Status**: `New` (standaard) of `Confirmed`
-- **EventId**: Vreemde sleutel naar Events (verplicht)
-- **Event**: Navigatie naar het gekoppelde event
+### Players Table
+- **Id**: Primary key
+- **FirstName**: Player first name
+- **LastName**: Player last name
+- **Email**: Player email address (optional)
+- **FideId**: FIDE identification number (optional)
+- **Rating**: Integer rating (e.g., Elo)
+- **Status**: `New` (default), `Confirmed`, `Cancelled`, or `Imported`
+- **Timestamp**: Player record timestamp (UTC)
+- **EventId**: Foreign key to Events (required)
+- **Event**: Navigation to the linked event
+
+### PlayerPublic Table
+- **Id**: Primary key
+- **FirstName**: Player first name
+- **LastName**: Player last name
+- **Email**: Player email address (optional)
+- **FideId**: FIDE identification number (optional)
+- **Rating**: Integer rating (e.g., Elo)
+- **Status**: `New` (default), `Confirmed`, `Cancelled`, or `Imported`
+- **Timestamp**: Record timestamp (UTC)
+- **EventId**: Foreign key to Events (required)
+- **Event**: Navigation to the linked event
+
+## 🛠️ Admin Features
+
+### User Management
+The Admin Dashboard provides full user management:
+
+#### Create New User
+- **Required**: Username and password
+- **Password**: Hashed with BCrypt and stored in User.PasswordHash
+- **Encryption**: If EncryptionKey is available, password is also encrypted and stored in UserHelper.Password
+- **Roles**: Default "Basic" role is assigned; additional roles can be selected
+
+#### Update Existing User
+- **Username**: Can always be changed (must remain unique)
+- **Password**: OPTIONAL
+  - Leave empty → current password remains unchanged
+  - Fill in → password is updated with the new value
+- **Roles**: Can be assigned or removed
+- **Validation**:
+  - Server-side: NewPassword field is optional on updates, but required on create
+  - Client-side: `required` attribute is dynamically managed via JavaScript
+- **Admin role constraints**:
+  - Admin users are always `IsActive = true`
+  - Admin users are always `IsBlocked = false`
+  - In update popup, `IsActive`/`IsBlocked` fields are hidden for Admin users
+
+## 🔐 Login Rules
+
+- Login is allowed only when user is active and not blocked.
+- Admin users are enforced as active and not blocked.
+- Authentication errors are returned as a generic message.
+
+## 🔄 PlayerPublic Import Flow
+
+- On `/Players?eventId={id}`, a `PlayerPublic` list is shown under the player list.
+- Each row has one import action.
+- Import creates a new `Player` row for the same event.
+- After import, `PlayerPublic.Status` is set to `Imported`.
+
+#### Admin Dashboard Features
+- All users table with:
+  - ID, Username, Creation date
+  - Decrypted password (if available from UserHelper)
+  - Password status (Decrypted/Error/Not available)
+  - Toegewezen rollen
+  - Edit/Delete acties
+- Alle logs tabel met volledige audit trail
+- Gebruiker search/filter mogelijkheden
+
+---
 
 ## 🔐 Encryptie & Wachtwoordbeheer
 

@@ -18,6 +18,7 @@ namespace metalimes.Data
         public DbSet<Configuration> Configuration { get; set; }
         public DbSet<Event> Event { get; set; }
         public DbSet<Player> Player { get; set; }
+        public DbSet<PlayerPublic> PlayerPublic { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
@@ -61,6 +62,20 @@ namespace metalimes.Data
                 .WithMany(e => e.Players)
                 .HasForeignKey(p => p.EventId)
                 .OnDelete(DeleteBehavior.Cascade);
+
+            modelBuilder.Entity<PlayerPublic>()
+                .HasOne(p => p.Event)
+                .WithMany(e => e.PublicPlayers)
+                .HasForeignKey(p => p.EventId)
+                .OnDelete(DeleteBehavior.Cascade);
+
+            modelBuilder.Entity<PlayerPublic>()
+                .HasIndex(p => new { p.EventId, p.FirstName, p.LastName, p.FideId })
+                .IsUnique();
+
+            modelBuilder.Entity<PlayerPublic>()
+                .Property(p => p.Status)
+                .HasDefaultValue(PlayerStatus.New);
         }
     }
 }
