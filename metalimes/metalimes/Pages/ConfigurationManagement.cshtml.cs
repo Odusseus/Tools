@@ -121,7 +121,7 @@ namespace metalimes.Pages
                     return Page();
                 }
 
-                config.Key = Key;
+                // Keep original key during update (the key selector is disabled in edit mode).
                 config.ValueType = ValueType;
                 config.StringValue = StringValue;
                 config.IntegerValue = IntegerValue;

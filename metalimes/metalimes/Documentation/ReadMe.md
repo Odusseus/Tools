@@ -32,6 +32,7 @@
 - **Index** (`/`): Home page with welcome message
 - **Bingo** (`/Bingo`): Bingo game interface
 - **Events** (`/Events`): Event overview and management
+  - Create form defaults: `BeginDate` = tomorrow, `EndDate` = tomorrow
 - **Players** (`/Players?eventId={id}`):
   - Add, edit, and delete players within an event
   - View `PlayerPublic` records for the same event
@@ -108,6 +109,8 @@ erDiagram
         datetime CreatedDate
         datetime BeginDate
         datetime EndDate
+        int Participants "default: 0"
+        int Rounds "default: 0"
     }
 
     PLAYER {
@@ -174,6 +177,8 @@ erDiagram
 - **CreatedDate**: Date when event was created
 - **BeginDate**: Event start date
 - **EndDate**: Event end date
+- **Participants**: Maximum number of participants (default `0`)
+- **Rounds**: Number of rounds (default `0`)
 - **Players**: 0 or more participants (navigation)
 
 ### Players Table
@@ -321,3 +326,6 @@ De `Services/EncryptionService.cs` klasse biedt:
 
 ## Link naar referentie
 https://learn.microsoft.com/en-us/answers/questions/5815581/library-e-sqlite3-not-found
+
+## API
+https://parse.bot/marketplace/6bbce1ef-d137-46c5-ba78-fda6015026e1/ratings-fide-com-api

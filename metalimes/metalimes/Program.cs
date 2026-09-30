@@ -29,6 +29,11 @@ builder.Services.AddAuthorization();
 // Register AppDbContext with SQLite provider using connection string from configuration.
 builder.Services.AddDbContext<AppDbContext>(options =>
     options.UseSqlite(builder.Configuration.GetConnectionString("Default")));
+builder.Services.AddHttpClient("ParseBot", client =>
+{
+    var baseUrl = builder.Configuration["ParseBot:BaseUrl"] ?? "https://api.parse.bot";
+    client.BaseAddress = new Uri(baseUrl);
+});
 
 builder.WebHost.UseKestrel(options =>
 {

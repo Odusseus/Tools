@@ -18,7 +18,11 @@ namespace metalimes.Pages
         public List<Event> UserEvents { get; set; } = new();
 
         [BindProperty]
-        public Event Event { get; set; } = new();
+        public Event Event { get; set; } = new()
+        {
+            BeginDate = DateTime.Today.AddDays(1),
+            EndDate = DateTime.Today.AddDays(1)
+        };
 
         [BindProperty]
         public int? EditingEventId { get; set; }
@@ -65,6 +69,8 @@ namespace metalimes.Pages
             eventToUpdate.Name = Event.Name;
             eventToUpdate.BeginDate = Event.BeginDate;
             eventToUpdate.EndDate = Event.EndDate;
+            eventToUpdate.Participants = Event.Participants;
+            eventToUpdate.Rounds = Event.Rounds;
 
             _db.Event.Update(eventToUpdate);
             _db.SaveChanges();

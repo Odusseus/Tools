@@ -38,7 +38,9 @@ namespace metalimes.Data.Migrations
                     Name = table.Column<string>(type: "TEXT", nullable: false),
                     CreatedDate = table.Column<DateTime>(type: "TEXT", nullable: false),
                     BeginDate = table.Column<DateTime>(type: "TEXT", nullable: false),
-                    EndDate = table.Column<DateTime>(type: "TEXT", nullable: false)
+                    EndDate = table.Column<DateTime>(type: "TEXT", nullable: false),
+                    Participants = table.Column<int>(type: "INTEGER", nullable: false),
+                    Rounds = table.Column<int>(type: "INTEGER", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -73,6 +75,7 @@ namespace metalimes.Data.Migrations
                     Email = table.Column<string>(type: "TEXT", nullable: false),
                     FideId = table.Column<string>(type: "TEXT", nullable: false),
                     Rating = table.Column<int>(type: "INTEGER", nullable: false),
+                    IsFideChecked = table.Column<bool>(type: "INTEGER", nullable: false),
                     Status = table.Column<int>(type: "INTEGER", nullable: false),
                     Timestamp = table.Column<DateTime>(type: "TEXT", nullable: false),
                     EventId = table.Column<int>(type: "INTEGER", nullable: false)

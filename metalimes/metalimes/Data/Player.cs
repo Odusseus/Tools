@@ -5,7 +5,8 @@ namespace metalimes.Data
         New = 0,
         Confirmed = 1,
         Cancelled = 2,
-        Imported = 3
+        Imported = 3,
+        Quit = 4
     }
 
     public class Player
@@ -16,6 +17,7 @@ namespace metalimes.Data
         public string Email { get; set; } = string.Empty;
         public string FideId { get; set; } = string.Empty;
         public int Rating { get; set; }
+        public bool IsFideChecked { get; set; } = false;
         public PlayerStatus Status { get; set; } = PlayerStatus.New;
         public DateTime Timestamp { get; set; } = DateTime.UtcNow;
         public int EventId { get; set; } // Required foreign key

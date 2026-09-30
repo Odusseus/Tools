@@ -29,6 +29,8 @@
                 <thead class="table-dark">
                     <tr>
                         <th>Event Name</th>
+                        <th>Participants</th>
+                        <th>Rounds</th>
                         <th>Begin Date</th>
                         <th>End Date</th>
                         <th>Created Date</th>
@@ -40,6 +42,8 @@
                     {
                         <tr>
                             <td><strong>@evt.Name</strong></td>
+                            <td>@evt.Participants</td>
+                            <td>@evt.Rounds</td>
                             <td>@evt.BeginDate.ToString("dd/MM/yyyy HH:mm")</td>
                             <td>@evt.EndDate.ToString("dd/MM/yyyy HH:mm")</td>
                             <td>@evt.CreatedDate.ToString("dd/MM/yyyy HH:mm")</td>
@@ -48,7 +52,7 @@
                                     <i class="bi bi-people"></i> Players
                                 </a>
                                 <button type="button" class="btn btn-sm btn-warning" data-bs-toggle="modal" data-bs-target="#editEventModal" 
-                                        onclick="setEditEvent(@evt.Id, '@evt.Name', '@evt.BeginDate.ToString("yyyy-MM-ddTHH:mm")', '@evt.EndDate.ToString("yyyy-MM-ddTHH:mm")')">
+                                        onclick="setEditEvent(@evt.Id, '@evt.Name', @evt.Participants, @evt.Rounds, '@evt.BeginDate.ToString("yyyy-MM-ddTHH:mm")', '@evt.EndDate.ToString("yyyy-MM-ddTHH:mm")')">
                                     <i class="bi bi-pencil"></i> Edit
                                 </button>
                                 <form method="post" asp-page-handler="Delete" asp-route-id="@evt.Id" style="display:inline;" 
@@ -88,6 +92,18 @@
                         <label asp-for="Event.BeginDate" class="form-label">Begin Date & Time *</label>
                         <input asp-for="Event.BeginDate" type="datetime-local" class="form-control" required />
                         <span asp-validation-for="Event.BeginDate" class="text-danger"></span>
+                    </div>
+
+                    <div class="mb-3">
+                        <label asp-for="Event.Participants" class="form-label">Participants *</label>
+                        <input asp-for="Event.Participants" type="number" min="0" class="form-control" required />
+                        <span asp-validation-for="Event.Participants" class="text-danger"></span>
+                    </div>
+
+                    <div class="mb-3">
+                        <label asp-for="Event.Rounds" class="form-label">Rounds *</label>
+                        <input asp-for="Event.Rounds" type="number" min="0" class="form-control" required />
+                        <span asp-validation-for="Event.Rounds" class="text-danger"></span>
                     </div>
 
                     <div class="mb-3">
@@ -132,6 +148,18 @@
                     </div>
 
                     <div class="mb-3">
+                        <label asp-for="Event.Participants" class="form-label">Participants *</label>
+                        <input asp-for="Event.Participants" type="number" min="0" class="form-control" id="editEventParticipants" required />
+                        <span asp-validation-for="Event.Participants" class="text-danger"></span>
+                    </div>
+
+                    <div class="mb-3">
+                        <label asp-for="Event.Rounds" class="form-label">Rounds *</label>
+                        <input asp-for="Event.Rounds" type="number" min="0" class="form-control" id="editEventRounds" required />
+                        <span asp-validation-for="Event.Rounds" class="text-danger"></span>
+                    </div>
+
+                    <div class="mb-3">
                         <label asp-for="Event.EndDate" class="form-label">End Date & Time *</label>
                         <input asp-for="Event.EndDate" type="datetime-local" class="form-control" id="editEventEndDate" required />
                         <span asp-validation-for="Event.EndDate" class="text-danger"></span>
@@ -149,9 +177,11 @@
 @section Scripts {
     <partial name="_ValidationScriptsPartial" />
     <script>
-        function setEditEvent(id, name, beginDate, endDate) {
+        function setEditEvent(id, name, participants, rounds, beginDate, endDate) {
             document.getElementById('editingEventId').value = id;
             document.getElementById('editEventName').value = name;
+            document.getElementById('editEventParticipants').value = participants;
+            document.getElementById('editEventRounds').value = rounds;
             document.getElementById('editEventBeginDate').value = beginDate;
             document.getElementById('editEventEndDate').value = endDate;
         }

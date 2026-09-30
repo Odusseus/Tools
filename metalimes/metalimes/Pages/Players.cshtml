@@ -19,6 +19,13 @@
     }
     else
     {
+        @if (!string.IsNullOrWhiteSpace(Model.FideErrorMessage))
+        {
+            <div class="alert alert-danger" role="alert">
+                @Model.FideErrorMessage
+            </div>
+        }
+
         <div class="card mb-4">
             <div class="card-body">
                 <h5 class="card-title mb-2">@Model.SelectedEvent.Name</h5>
@@ -90,8 +97,9 @@
                                     <th>Email</th>
                                     <th>FideID</th>
                                     <th>Rating</th>
+                                    <th>FIDE Checked</th>
                                     <th>Status</th>
-                                    <th style="width: 190px;">Actions</th>
+                                    <th style="width: 280px;">Actions</th>
                                 </tr>
                             </thead>
                             <tbody>
@@ -103,6 +111,16 @@
                                         <td>@player.Email</td>
                                         <td>@player.FideId</td>
                                         <td>@player.Rating</td>
+                                        <td>
+                                            @if (player.IsFideChecked)
+                                            {
+                                                <span class="badge bg-success">true</span>
+                                            }
+                                            else
+                                            {
+                                                <span class="badge bg-secondary">false</span>
+                                            }
+                                        </td>
                                         <td>
                                             @if (player.Status == PlayerStatus.Confirmed)
                                             {
@@ -116,12 +134,23 @@
                                             {
                                                 <span class="badge bg-info">Imported</span>
                                             }
+                                            else if (player.Status == PlayerStatus.Quit)
+                                            {
+                                                <span class="badge bg-warning text-dark">Quit</span>
+                                            }
                                             else
                                             {
                                                 <span class="badge bg-secondary">New</span>
                                             }
                                         </td>
                                         <td>
+                                            <form method="post" asp-page-handler="RecheckFide" class="d-inline me-1">
+                                                <input type="hidden" name="eventId" value="@Model.SelectedEvent.Id" />
+                                                <input type="hidden" name="id" value="@player.Id" />
+                                                <button type="submit" class="btn btn-primary" title="Recheck FIDE for this player">
+                                                    <i class="bi bi-arrow-repeat"></i> Recheck FIDE
+                                                </button>
+                                            </form>
                                             <button type="button"
                                                     class="btn btn-sm btn-warning"
                                                     data-bs-toggle="modal"
