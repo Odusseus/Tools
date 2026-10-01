@@ -76,6 +76,7 @@ namespace metalimes.Data.Migrations
                     FideId = table.Column<string>(type: "TEXT", nullable: false),
                     Rating = table.Column<int>(type: "INTEGER", nullable: false),
                     IsFideChecked = table.Column<bool>(type: "INTEGER", nullable: false),
+                    FideLookupResponseJson = table.Column<string>(type: "TEXT", nullable: true),
                     Status = table.Column<int>(type: "INTEGER", nullable: false),
                     Timestamp = table.Column<DateTime>(type: "TEXT", nullable: false),
                     EventId = table.Column<int>(type: "INTEGER", nullable: false)

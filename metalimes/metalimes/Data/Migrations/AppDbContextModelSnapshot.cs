@@ -134,6 +134,9 @@ namespace metalimes.Data.Migrations
                     b.Property<bool>("IsFideChecked")
                         .HasColumnType("INTEGER");
 
+                    b.Property<string>("FideLookupResponseJson")
+                        .HasColumnType("TEXT");
+
                     b.Property<string>("LastName")
                         .IsRequired()
                         .HasColumnType("TEXT");

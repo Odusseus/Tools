@@ -99,6 +99,7 @@
                                     <th>Rating</th>
                                     <th>FIDE Checked</th>
                                     <th>Status</th>
+                                    <th>Response</th>
                                     <th style="width: 280px;">Actions</th>
                                 </tr>
                             </thead>
@@ -132,15 +133,31 @@
                                             }
                                             else if (player.Status == PlayerStatus.Imported)
                                             {
-                                                <span class="badge bg-info">Imported</span>
+                                                <span class="badge bg-info text-dark">Imported</span>
                                             }
                                             else if (player.Status == PlayerStatus.Quit)
                                             {
-                                                <span class="badge bg-warning text-dark">Quit</span>
+                                                <span class="badge bg-dark">Quit</span>
                                             }
                                             else
                                             {
                                                 <span class="badge bg-secondary">New</span>
+                                            }
+                                        </td>
+                                        <td>
+                                            @if (!string.IsNullOrWhiteSpace(player.FideLookupResponseJson))
+                                            {
+                                                <button type="button"
+                                                        class="btn btn-sm btn-outline-info js-show-fide-response"
+                                                        data-player-name="@($"{player.FirstName} {player.LastName}".Trim())"
+                                                        data-response="@player.FideLookupResponseJson"
+                                                        title="Show ParseBot response">
+                                                    View
+                                                </button>
+                                            }
+                                            else
+                                            {
+                                                <span class="text-muted">—</span>
                                             }
                                         </td>
                                         <td>
@@ -308,26 +325,53 @@
                 </div>
             </div>
         </div>
+
+        <div class="modal fade" id="fideResponseModal" tabindex="-1" aria-hidden="true">
+            <div class="modal-dialog modal-lg modal-dialog-scrollable">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="fideResponseModalTitle">FIDE response</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body">
+                        <pre id="fideResponseModalBody" class="mb-0" style="white-space: pre-wrap; word-break: break-word;"></pre>
+                    </div>
+                </div>
+            </div>
+        </div>
     }
 </div>
 
 @section Scripts {
-    <partial name="_ValidationScriptsPartial" />
-    <script>
-        const editPlayerModal = document.getElementById('editPlayerModal');
-        if (editPlayerModal) {
-            editPlayerModal.addEventListener('show.bs.modal', function (event) {
-                const button = event.relatedTarget;
-                if (!button) return;
+    @await Html.PartialAsync("_ValidationScriptsPartial")
 
-                document.getElementById('editPlayerId').value = button.getAttribute('data-player-id') || '';
-                document.getElementById('editPlayerFirstName').value = button.getAttribute('data-first-name') || '';
-                document.getElementById('editPlayerLastName').value = button.getAttribute('data-last-name') || '';
-                document.getElementById('editPlayerEmail').value = button.getAttribute('data-email') || '';
-                document.getElementById('editPlayerFideId').value = button.getAttribute('data-fide-id') || '';
-                document.getElementById('editPlayerRating').value = button.getAttribute('data-rating') || '0';
-                document.getElementById('editPlayerStatus').value = button.getAttribute('data-status') || 'New';
+    <script>
+        (function () {
+            const modalElement = document.getElementById('fideResponseModal');
+            if (!modalElement || typeof bootstrap === 'undefined') {
+                return;
+            }
+
+            const modal = new bootstrap.Modal(modalElement);
+            const title = document.getElementById('fideResponseModalTitle');
+            const body = document.getElementById('fideResponseModalBody');
+
+            document.querySelectorAll('.js-show-fide-response').forEach(btn => {
+                btn.addEventListener('click', () => {
+                    const playerName = btn.getAttribute('data-player-name') || 'Player';
+                    const response = btn.getAttribute('data-response') || '';
+
+                    if (title) {
+                        title.textContent = `ParseBot response - ${playerName}`;
+                    }
+
+                    if (body) {
+                        body.textContent = response;
+                    }
+
+                    modal.show();
+                });
             });
-        }
+        })();
     </script>
 }

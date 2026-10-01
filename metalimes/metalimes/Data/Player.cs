@@ -18,6 +18,7 @@ namespace metalimes.Data
         public string FideId { get; set; } = string.Empty;
         public int Rating { get; set; }
         public bool IsFideChecked { get; set; } = false;
+        public string? FideLookupResponseJson { get; set; }
         public PlayerStatus Status { get; set; } = PlayerStatus.New;
         public DateTime Timestamp { get; set; } = DateTime.UtcNow;
         public int EventId { get; set; } // Required foreign key

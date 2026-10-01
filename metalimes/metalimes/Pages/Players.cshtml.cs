@@ -285,13 +285,15 @@ namespace metalimes.Pages
                 request.Headers.TryAddWithoutValidation("X-API-Key", apiKey);
 
                 using var response = await client.SendAsync(request);
+                var responseBody = await response.Content.ReadAsStringAsync();
+                player.FideLookupResponseJson = responseBody;
+
                 if (!response.IsSuccessStatusCode)
                 {
                     return FideLookupResult.Failure($"ParseBot error: {(int)response.StatusCode} {response.ReasonPhrase}");
                 }
 
-                await using var stream = await response.Content.ReadAsStreamAsync();
-                using var document = await JsonDocument.ParseAsync(stream);
+                using var document = JsonDocument.Parse(responseBody);
 
                 if (TryExtractRating(document.RootElement, out var rating))
                 {
