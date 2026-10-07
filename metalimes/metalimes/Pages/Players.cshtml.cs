@@ -5,6 +5,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using Microsoft.EntityFrameworkCore;
+using System.Security.Claims;
 
 namespace metalimes.Pages
 {
@@ -231,7 +232,20 @@ namespace metalimes.Pages
 
         private bool LoadEventAndPlayers(int eventId)
         {
-            SelectedEvent = _db.Event.AsNoTracking().FirstOrDefault(e => e.Id == eventId);
+            var currentUserId = GetCurrentUserId();
+            var query = _db.Event.AsNoTracking().Where(e => e.Id == eventId);
+
+            if (IsArbiter())
+            {
+                if (!currentUserId.HasValue)
+                {
+                    return false;
+                }
+
+                query = query.Where(e => e.OwnerUserId == currentUserId.Value);
+            }
+
+            SelectedEvent = query.FirstOrDefault();
             if (SelectedEvent == null)
             {
                 return false;
@@ -367,6 +381,14 @@ namespace metalimes.Pages
 
             return false;
         }
+
+        private int? GetCurrentUserId()
+        {
+            var idClaim = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            return int.TryParse(idClaim, out var userId) ? userId : null;
+        }
+
+        private bool IsArbiter() => User.HasClaim("role", "arbiter");
 
         public class CreatePlayerInput
         {

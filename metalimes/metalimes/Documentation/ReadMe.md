@@ -33,11 +33,13 @@
 - **Bingo** (`/Bingo`): Bingo game interface
 - **Events** (`/Events`): Event overview and management
   - Create form defaults: `BeginDate` = tomorrow, `EndDate` = tomorrow
+  - Arbiter users can only see, edit, and delete events where `Event.OwnerUserId` matches their user id
 - **Players** (`/Players?eventId={id}`):
   - Add, edit, and delete players within an event
   - View `PlayerPublic` records for the same event
   - Import `PlayerPublic` one-by-one into `Player`
   - Imported public records are marked with status `Imported`
+  - Arbiter users can only open this page for events they own
 - **My Welcome** (`/MyWelcome`): Personal welcome page
 - **Logout** (`/Logout`): Logout processing (POST-only)
 
@@ -61,6 +63,7 @@
 ```mermaid
 erDiagram
     USER ||--o{ LOG : creates
+    USER ||--o{ EVENT : owns
     EVENT ||--o{ PLAYER : contains
     EVENT ||--o{ PLAYERPUBLIC : contains
     USER ||--o{ USERROLE : has
@@ -105,6 +108,7 @@ erDiagram
 
     EVENT {
         int Id PK
+        int OwnerUserId FK "optional owner (User.Id)"
         string Name
         datetime CreatedDate
         datetime BeginDate
@@ -173,6 +177,7 @@ erDiagram
 
 ### Events Table
 - **Id**: Primary key
+- **OwnerUserId**: Optional owner (`User.Id`); used to restrict arbiter access to own events
 - **Name**: Event name
 - **CreatedDate**: Date when event was created
 - **BeginDate**: Event start date
@@ -305,6 +310,10 @@ De `Services/EncryptionService.cs` klasse biedt:
 
 - **Users ↔ Logs**: 1-op-veel (optioneel)
   - Als een user verwijderd wordt, krijgen referentie logs NULL
+
+- **Users ↔ Events**: 1-op-veel (optioneel)
+  - `Event.OwnerUserId` verwijst naar `User.Id`
+  - Alleen arbiters zien/beheren events met hun eigen `OwnerUserId`
 
 - **Events ↔ Players**: 1-op-veel (verplicht)
   - Als een event verwijderd wordt, worden alle gekoppelde players verwijderd (CASCADE)

@@ -35,6 +35,7 @@ namespace metalimes.Data.Migrations
                 {
                     Id = table.Column<int>(type: "INTEGER", nullable: false)
                         .Annotation("Sqlite:Autoincrement", true),
+                    OwnerUserId = table.Column<int>(type: "INTEGER", nullable: true),
                     Name = table.Column<string>(type: "TEXT", nullable: false),
                     CreatedDate = table.Column<DateTime>(type: "TEXT", nullable: false),
                     BeginDate = table.Column<DateTime>(type: "TEXT", nullable: false),

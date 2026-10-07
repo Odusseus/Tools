@@ -72,6 +72,9 @@ namespace metalimes.Data.Migrations
                         .IsRequired()
                         .HasColumnType("TEXT");
 
+                    b.Property<int?>("OwnerUserId")
+                        .HasColumnType("INTEGER");
+
                     b.Property<int>("Rounds")
                         .HasColumnType("INTEGER");
 

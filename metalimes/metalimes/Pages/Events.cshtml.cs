@@ -1,6 +1,7 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
+using System.Security.Claims;
 using metalimes.Data;
 
 namespace metalimes.Pages
@@ -41,7 +42,14 @@ namespace metalimes.Pages
                 return Page();
             }
 
+            var currentUserId = GetCurrentUserId();
+            if (IsArbiter() && !currentUserId.HasValue)
+            {
+                return Forbid();
+            }
+
             Event.CreatedDate = DateTime.UtcNow;
+            Event.OwnerUserId = currentUserId;
 
             _db.Event.Add(Event);
             _db.SaveChanges();
@@ -58,7 +66,16 @@ namespace metalimes.Pages
                 return Page();
             }
 
-            var eventToUpdate = _db.Event.FirstOrDefault(e => e.Id == EditingEventId.Value);
+            var currentUserId = GetCurrentUserId();
+            if (IsArbiter() && !currentUserId.HasValue)
+            {
+                return Forbid();
+            }
+
+            var eventToUpdate = _db.Event.FirstOrDefault(e =>
+                e.Id == EditingEventId.Value &&
+                (!IsArbiter() || e.OwnerUserId == currentUserId));
+
             if (eventToUpdate == null)
             {
                 ModelState.AddModelError(string.Empty, "Event not found.");
@@ -81,7 +98,16 @@ namespace metalimes.Pages
 
         public IActionResult OnPostDelete(int id)
         {
-            var eventToDelete = _db.Event.FirstOrDefault(e => e.Id == id);
+            var currentUserId = GetCurrentUserId();
+            if (IsArbiter() && !currentUserId.HasValue)
+            {
+                return Forbid();
+            }
+
+            var eventToDelete = _db.Event.FirstOrDefault(e =>
+                e.Id == id &&
+                (!IsArbiter() || e.OwnerUserId == currentUserId));
+
             if (eventToDelete == null)
             {
                 return NotFound();
@@ -96,10 +122,32 @@ namespace metalimes.Pages
 
         private void LoadUserEvents()
         {
-            UserEvents = _db.Event
+            var query = _db.Event.AsQueryable();
+            var currentUserId = GetCurrentUserId();
+
+            if (IsArbiter())
+            {
+                if (!currentUserId.HasValue)
+                {
+                    UserEvents = new List<Event>();
+                    return;
+                }
+
+                query = query.Where(e => e.OwnerUserId == currentUserId.Value);
+            }
+
+            UserEvents = query
                 .OrderBy(e => e.BeginDate)
                 .ThenBy(e => e.Name)
                 .ToList();
         }
+
+        private int? GetCurrentUserId()
+        {
+            var idClaim = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            return int.TryParse(idClaim, out var userId) ? userId : null;
+        }
+
+        private bool IsArbiter() => User.HasClaim("role", "arbiter");
     }
 }
