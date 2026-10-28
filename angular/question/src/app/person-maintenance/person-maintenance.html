@@ -1,0 +1,45 @@
+<app-menu></app-menu>
+
+<h1>Person maintenance</h1>
+
+<input
+    type="text"
+    placeholder="Enter name"
+    [(ngModel)]="name"
+>
+
+@if (editingId === null) {
+    <button (click)="addPerson()">
+        Add
+    </button>
+    <button (click)="removeAll()">
+        Remove all
+    </button>
+    <button (click)="resetSelectedCounts()">
+        Reset selected counts
+    </button>
+} @else {
+    <button (click)="savePerson()">
+        Save
+    </button>
+
+    <button (click)="clearForm()">
+        Cancel
+    </button>
+}
+
+
+<ul>
+    @for (person of persons.getAll(); track person.id) {
+        <li>
+            {{ person.id }} - {{ person.name }} - {{ person.selectedCount }}
+            <button (click)="editPerson(person)">
+                Edit
+            </button>
+            
+            <button (click)="deletePerson(person.id)">
+                Delete
+            </button>
+        </li>
+    }
+</ul>

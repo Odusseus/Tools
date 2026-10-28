@@ -1,0 +1,26 @@
+<app-menu></app-menu>
+
+<h1>Wheel of Fortune!</h1>
+
+<button (click)="getRandomPerson()">
+    Pick random person
+</button>
+
+<button type="button" (click)="startSpinning()">
+  Start
+</button>
+
+<button type="button" (click)="stopSpinning()">
+  Stop
+</button>
+
+@if (selectedName) {
+    <p>
+        Selected person: {{ selectedName }}
+    </p>
+} @else {
+    <p>
+        No person selected yet.
+    </p> 
+    
+}
