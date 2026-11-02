@@ -42,11 +42,13 @@ export class Persons {
         this.save();
     }
 
-    update(person: Person): void {
+    update(person: Person, isSave: boolean = true): void {
         const index = this.persons.findIndex(p => p.id === person.id);
         if (index !== -1) {
             this.persons[index] = person;
-            this.save();
+            if (isSave) {
+                this.save();
+            }
         }
     }
 

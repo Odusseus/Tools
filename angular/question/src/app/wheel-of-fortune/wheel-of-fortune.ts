@@ -1,4 +1,4 @@
-import { Component } from '@angular/core';
+import { ChangeDetectorRef, Component } from '@angular/core';
 import { Persons } from '../model/persons';
 import { Menu } from '../menu/menu';
 
@@ -13,6 +13,9 @@ export class WheelOfFortune {
   selectedName: string = '';
   timer: any = null;
   isSpinning = false;
+  totalSelections = 0;
+
+  constructor(private cdr: ChangeDetectorRef) {}
 
   getRandomPerson(): void {
     const persons = this.persons.getAll();
@@ -26,11 +29,11 @@ export class WheelOfFortune {
     const person = persons[randomIndex];
 
     this.selectedName = person.name;
-    person.incrementSelectedCount()
+    person.incrementSelectedCount();
 
-    this.persons.update(persons[randomIndex]);
-    this.persons.save();
-  
+    this.persons.update(person, false);
+    this.totalSelections++;
+    this.cdr.markForCheck();
   }
   
   startSpinning(): void {
@@ -39,18 +42,25 @@ export class WheelOfFortune {
     }
 
     this.isSpinning = true;
+    this.tick();
+  }
 
-    this.timer = setInterval(() => {
-      this.getRandomPerson();
-    }, 100);
+  tick(): void {
+    if (!this.isSpinning) {
+      return;
+    }
+    this.getRandomPerson();
+    this.timer = setTimeout(() => this.tick(), 300);
   }
 
   stopSpinning(): void {
+    this.isSpinning = false;
+
     if (this.timer) {
-      clearInterval(this.timer);
+      clearTimeout(this.timer);
       this.timer = null;
     }
-
-    this.isSpinning = false;
+    this.persons.save();
   }
+
 }

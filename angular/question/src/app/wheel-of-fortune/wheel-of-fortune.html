@@ -14,6 +14,8 @@
   Stop
 </button>
 
+<p>Total selections: {{ totalSelections }}</p>
+
 @if (selectedName) {
     <p>
         Selected person: {{ selectedName }}
@@ -24,3 +26,10 @@
     </p> 
     
 }
+<ul>
+    @for (person of persons.getAll(); track person.id) {
+        <li>
+            {{ person.id }} - {{ person.name }} - {{ person.selectedCount }}            
+        </li>
+    }
+</ul>
