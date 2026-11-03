@@ -7,29 +7,55 @@
 </button>
 
 <button type="button" (click)="startSpinning()">
-  Start
+    Start
+</button>
+
+<button type="button" (click)="startSpinning3w()">
+    Start 3 winners
 </button>
 
 <button type="button" (click)="stopSpinning()">
-  Stop
+    Stop
 </button>
 
 <p>Total selections: {{ totalSelections }}</p>
 
 @if (selectedName) {
-    <p>
-        Selected person: {{ selectedName }}
-    </p>
+<p>
+    Selected person: {{ selectedName }}
+</p>
 } @else {
-    <p>
-        No person selected yet.
-    </p> 
-    
+<p>
+    No person selected yet.
+</p>
+
 }
+
+@if (isSpinning === true) {
 <ul>
     @for (person of persons.getAll(); track person.id) {
-        <li>
-            {{ person.id }} - {{ person.name }} - {{ person.selectedCount }}            
-        </li>
+    <li [class.last-selected]="person.isLastSelected">
+        {{ person.id }} - {{ person.name }} - {{ person.selectedCount }}
+    </li>
     }
 </ul>
+}
+
+@if (isSpinning3w === true) {
+<ul>
+    @for (person of persons.getAll(); track person.id) {
+    <li [class.last-selected]="person.isLastSelected">
+        {{ person.id }} - {{ person.name }}
+    </li>
+    }
+</ul>
+}
+@if (winners.length > 0) {
+<ol>
+    @for (winner of winners; track winner) {
+    <li>
+        {{ winner }}
+    </li>
+    }
+</ol>
+}

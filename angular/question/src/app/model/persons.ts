@@ -14,10 +14,11 @@ export class Persons {
                 id: number;
                 name: string;
                 selectedCount: number;
+                isLastSelected: boolean;
             }>;
 
             this.persons = parsed.map(
-                person => new Person(person.id, person.name, person.selectedCount)
+                person => new Person( person.id, person.name, person.selectedCount, person.isLastSelected )
             );
         } else {
             this.persons = []
@@ -34,11 +35,13 @@ export class Persons {
 
     add(person: Person): void {
         this.persons.push(person);
+        this.renummerateIds();
         this.save();
     }
 
     remove(id: number): void {
         this.persons = this.persons.filter(person => person.id !== id);
+        this.renummerateIds();
         this.save();
     }
 
@@ -55,5 +58,13 @@ export class Persons {
     removeAll(): void {
         this.persons = [];
         this.save();
+    }
+
+    renummerateIds(): void {
+        this.persons.forEach((person, index) => {
+            person.id = index + 1;
+            person.selectedCount = 0;
+            person.isLastSelected = false;
+        });
     }
 }

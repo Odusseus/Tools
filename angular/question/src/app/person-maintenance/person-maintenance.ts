@@ -21,9 +21,8 @@ export class PersonMaintenance {
     if (!trimmedName) {
       return;
     }
-
-    const nextId = this.persons.getAll().reduce((maxId, person) => Math.max(maxId, person.id), 0) + 1;
-    this.persons.add(new Person(nextId, trimmedName, 0));
+    
+    this.persons.add(new Person(0, trimmedName, 0, false));    
     this.name = '';
     this.persons.save();
   }
