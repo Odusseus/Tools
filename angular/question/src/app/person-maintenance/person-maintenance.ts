@@ -1,4 +1,5 @@
-import { Component } from '@angular/core';
+import { Component, inject } from '@angular/core';
+import { PersonsStorage } from '../shared/services/persons-storage';
 import { Persons } from '../model/persons';
 import { Person } from '../model/person';
 import { FormsModule } from '@angular/forms';
@@ -9,10 +10,10 @@ import { Menu } from '../menu/menu';
   standalone: true,
   imports: [FormsModule, Menu],
   templateUrl: './person-maintenance.html',
-  styleUrl: './person-maintenance.css',
+  styleUrls: ['./person-maintenance.css'],
 })
 export class PersonMaintenance {
-  persons = new Persons();
+  persons = new Persons(inject(PersonsStorage));
   name = '';
   editingId: number | null = null;
 

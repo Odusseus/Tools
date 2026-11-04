@@ -18,11 +18,11 @@
     Stop
 </button>
 
-<p>Total selections: {{ totalSelections }}</p>
+<p>Total selections: {{ totalSelections() }}</p>
 
-@if (selectedName) {
+@if (selectedName()) {
 <p>
-    Selected person: {{ selectedName }}
+    Selected person: {{ selectedName() }}
 </p>
 } @else {
 <p>
@@ -31,7 +31,7 @@
 
 }
 
-@if (isSpinning === true) {
+@if (isSpinning()) {
 <ul>
     @for (person of persons.getAll(); track person.id) {
     <li [class.last-selected]="person.isLastSelected">
@@ -41,7 +41,7 @@
 </ul>
 }
 
-@if (isSpinning3w === true) {
+@if (isSpinning3w()) {
 <ul>
     @for (person of persons.getAll(); track person.id) {
     <li [class.last-selected]="person.isLastSelected">
@@ -50,9 +50,9 @@
     }
 </ul>
 }
-@if (winners.length > 0) {
+@if (winners().length > 0) {
 <ol>
-    @for (winner of winners; track winner) {
+    @for (winner of winners(); track winner) {
     <li>
         {{ winner }}
     </li>

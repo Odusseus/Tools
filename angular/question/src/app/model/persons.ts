@@ -1,32 +1,19 @@
 import { Person } from './person';
+import { PersonsStorage } from '../shared/services/persons-storage';
 
 export class Persons {
     private persons: Person[] = [];
 
-    constructor() {
+    constructor(private storage: PersonsStorage) {
         this.load();
     }
 
     private load(): void {
-        const storedPersons = localStorage.getItem('persons');
-        if (storedPersons) {
-            const parsed = JSON.parse(storedPersons) as Array<{
-                id: number;
-                name: string;
-                selectedCount: number;
-                isLastSelected: boolean;
-            }>;
-
-            this.persons = parsed.map(
-                person => new Person( person.id, person.name, person.selectedCount, person.isLastSelected )
-            );
-        } else {
-            this.persons = []
-        }
+        this.persons = this.storage.load();
     }
 
     save(): void {
-        localStorage.setItem('persons', JSON.stringify(this.persons));
+        this.storage.save(this.persons);
     }
 
     getAll(): Person[] {
